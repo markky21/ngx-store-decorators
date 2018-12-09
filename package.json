@@ -1,37 +1,66 @@
 {
   "name": "ngx-store-decorators",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "A set of useful decorators and classes to quickly create a facade between the application and the store.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markky21/ngx-store-decorators.git"
+  },
+  "keywords": [
+    "TypeScript",
+    "Decorators",
+    "NgRx"
+  ],
+  "author": "Marcin Mirecki <markky21@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markky21/ngx-store-decorators/issues"
+  },
+  "homepage": "https://github.com/markky21/ngx-store-decorators#readme",
   "scripts": {
-    "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
+    "build:demo": "ng build --prod",
+    "build:lib": "ng build NgxStoreDecorators",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "npm:pack": "cd dist/ngx-store-decorators && npm pack",
+    "npm:create-package": "npm run build:lib && npm run npm:pack",
+    "npm:publish": "npm run npm:create-package && npm publish",
+    "test:lib": "ng test NgxStoreDecorators",
+    "test:lib:raport": "ng test NgxStoreDecorators --code-coverage",
+    "test:lib:show": "http-server -c-1 -o -p 9875 ./coverage"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "~7.1.0",
+    "@angular/cdk": "~7.1.1",
     "@angular/common": "~7.1.0",
     "@angular/compiler": "~7.1.0",
     "@angular/core": "~7.1.0",
     "@angular/forms": "~7.1.0",
+    "@angular/material": "^7.1.1",
     "@angular/platform-browser": "~7.1.0",
     "@angular/platform-browser-dynamic": "~7.1.0",
     "@angular/router": "~7.1.0",
+    "@ngrx/store": "^6.1.2",
+    "@ngrx/store-devtools": "^6.1.2",
     "core-js": "^2.5.4",
+    "deep-diff": "^1.0.2",
+    "fast-deep-equal": "^2.0.1",
+    "hammerjs": "^2.0.8",
+    "http-server": "^0.11.1",
     "rxjs": "~6.3.3",
     "tslib": "^1.9.0",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.11.0",
+    "@angular-devkit/build-ng-packagr": "~0.11.0",
     "@angular/cli": "~7.1.2",
     "@angular/compiler-cli": "~7.1.0",
     "@angular/language-service": "~7.1.0",
-    "@types/node": "~8.9.4",
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
+    "@types/node": "~8.9.4",
     "codelyzer": "~4.5.0",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
@@ -40,8 +69,11 @@
     "karma-coverage-istanbul-reporter": "~2.0.1",
     "karma-jasmine": "~1.1.2",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "ng-packagr": "^4.2.0",
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
+    "tsickle": ">=0.29.0",
+    "tslib": "^1.9.0",
     "tslint": "~5.11.0",
     "typescript": "~3.1.6"
   }

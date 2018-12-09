@@ -17,6 +17,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ngx-store-decorators": [
+        "dist/ngx-store-decorators"
+      ],
+      "ngx-store-decorators/*": [
+        "dist/ngx-store-decorators/*"
+      ]
+    }
   }
 }
