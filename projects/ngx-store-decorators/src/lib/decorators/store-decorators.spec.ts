@@ -89,6 +89,23 @@ describe('Decorator StoreSelect', () => {
 
     expect(error).toBeTruthy();
   });
+
+  it('should trow an error when user try to set value to decorated property', () => {
+    const observable = of(21);
+    spyOn<any>(storeInstance, 'pipe').and.returnValue(observable);
+
+    const decoratorFn = StoreSelect(storeSelector);
+
+    let error;
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      sampleClassInstance.sampleProperty$ = 1;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
 });
 
 describe('Decorator StoreSubscribe', () => {
@@ -128,7 +145,7 @@ describe('Decorator StoreSubscribe', () => {
 
   it('should return throw an error when subscriptions property does not exist', () => {
     const observable = of(21);
-    const spy = spyOn<any>(storeInstance, 'pipe').and.returnValue(observable);
+    spyOn<any>(storeInstance, 'pipe').and.returnValue(observable);
 
     const decoratorFn = StoreSubscribe(storeSelector);
 
@@ -136,6 +153,41 @@ describe('Decorator StoreSubscribe', () => {
     try {
       decoratorFn(sampleClassWithoutSubscriptionsInstance, 'sampleProperty$');
       const values = sampleClassWithoutSubscriptionsInstance.sampleProperty$;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
+
+
+  it('should return throw an error when subscriptions property does not exist', () => {
+    const observable = of(21);
+    spyOn<any>(storeInstance, 'pipe').and.returnValue(observable);
+
+    const decoratorFn = StoreSubscribe(storeSelector, { subscriptionsCollector: 'wrongPropertyName' });
+
+    let error;
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      const values = sampleClassInstance.sampleProperty$;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
+
+  it('should trow an error when user try to set value to decorated property', () => {
+    const observable = of(21);
+    spyOn<any>(storeInstance, 'pipe').and.returnValue(observable);
+
+    const decoratorFn = StoreSubscribe(storeSelector);
+
+    let error;
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      sampleClassInstance.sampleProperty$ = 1;
     } catch (e) {
       error = e;
     }

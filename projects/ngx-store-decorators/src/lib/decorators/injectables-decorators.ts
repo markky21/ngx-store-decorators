@@ -1,8 +1,16 @@
-import { isObservable } from 'rxjs/internal/util/isObservable';
-import { Subscription, Observable } from 'rxjs';
+import { Observable, isObservable } from 'rxjs';
 
-import { DecoratorSelectSubscribeOptionsInterface } from './store-decorators';
-import { distinctUntilObjectChanged } from '../rxjs-pipes/distinctUntilObjectChanged';
+import {
+  applyPipes,
+  checkIfHasInjection,
+  checkIfHasPropertySubscriptions,
+  checkIfInjectionHasMethodOrProperty,
+  decoratorOptionDefaultValues,
+  DecoratorOptionInterface,
+  logValues,
+  throwIsNotAnObservable,
+  throwIsReadonly
+} from '../common';
 
 /**
  * The decorator who pass Observable from injection method or property to decorated property
@@ -18,19 +26,13 @@ import { distinctUntilObjectChanged } from '../rxjs-pipes/distinctUntilObjectCha
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function Select(
-  injection: string,
-  methodOrProperty: string,
-  options?: DecoratorSelectSubscribeOptionsInterface
-) {
+export function Select(injection: string, methodOrProperty: string, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      if (!this[injection]) {
-        throw new Error(`The class instance does not contain the injection: ${injection}`);
-      }
-      if (!this[injection][methodOrProperty]) {
-        throw new Error(`The ${injection} instance does not contain the method or property: ${methodOrProperty}`);
-      }
+      options = { ...decoratorOptionDefaultValues, ...options };
+
+      checkIfHasInjection.call(this, injection);
+      checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
 
       const privateKeyName = '_' + key;
 
@@ -44,13 +46,12 @@ export function Select(
           try {
             selection = this[injection][methodOrProperty]();
           } catch (e) {
-            throw new Error(`this.${injection}.${methodOrProperty} is not a Observable or returning Observable`);
+            throwIsNotAnObservable(injection, methodOrProperty);
           }
         }
 
-        if (options && options.shouldDistinctUntilChanged) {
-          selection = selection.pipe(distinctUntilObjectChanged(options.compareFunction));
-        }
+        selection = applyPipes(selection, options);
+        logValues.call(this, selection, key, options);
 
         this[privateKeyName] = selection;
       }
@@ -59,7 +60,7 @@ export function Select(
     };
 
     const setter = function() {
-      throw new Error(`The "${key}" property is readonly`);
+      throwIsReadonly(key);
     };
 
     if (delete target[key]) {
@@ -87,22 +88,14 @@ export function Select(
  * public currency: CurrencyInterface;
  * ```
  */
-export function Subscribe(
-  injection: string,
-  methodOrProperty: string,
-  options?: DecoratorSelectSubscribeOptionsInterface
-) {
+export function Subscribe(injection: string, methodOrProperty: string, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      if (!this[injection]) {
-        throw new Error(`The class instance does not contain the injection: ${injection}`);
-      }
-      if (!this[injection][methodOrProperty]) {
-        throw new Error(`The ${injection} instance does not contain the method or property: ${methodOrProperty}`);
-      }
-      if (!(this.subscriptions as Subscription)) {
-        throw new Error(`The class ${this.prototype.constructor.name} does not contain the subscription property`);
-      }
+      options = { ...decoratorOptionDefaultValues, ...options };
+
+      checkIfHasInjection.call(this, injection);
+      checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+      checkIfHasPropertySubscriptions.call(this, options);
 
       const privateKeyName = '_' + key;
 
@@ -116,15 +109,14 @@ export function Subscribe(
           try {
             selection = this[injection][methodOrProperty]();
           } catch (e) {
-            throw new Error(`this.${injection}.${methodOrProperty} is not a Observable or returning Observable`);
+            throwIsNotAnObservable(injection, methodOrProperty);
           }
         }
 
-        if (options && options.shouldDistinctUntilChanged) {
-          selection = selection.pipe(distinctUntilObjectChanged(options.compareFunction));
-        }
+        selection = applyPipes(selection, options);
+        logValues.call(this, selection, key, options);
 
-        this.subscriptions.add(
+        this[options.subscriptionsCollector].add(
           selection.subscribe(data => {
             this[privateKeyName] = data;
           })
@@ -135,7 +127,7 @@ export function Subscribe(
     };
 
     const setter = function() {
-      throw new Error(`The "${key}" property is readonly`);
+      throwIsReadonly(key);
     };
 
     if (delete target[key]) {

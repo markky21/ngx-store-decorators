@@ -2,11 +2,14 @@ import { select, Selector, Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
 import { distinctUntilObjectChanged } from '../rxjs-pipes/distinctUntilObjectChanged';
-
-export interface DecoratorSelectSubscribeOptionsInterface {
-  shouldDistinctUntilChanged: boolean;
-  compareFunction?: (p: any, q: any) => boolean;
-}
+import {
+  applyPipes,
+  checkIfHasPropertyStore,
+  checkIfHasPropertySubscriptions,
+  decoratorOptionDefaultValues,
+  DecoratorOptionInterface,
+  logValues
+} from '../common';
 
 /**
  * The decorator who pass Observable from injection method or property to decorated property
@@ -21,24 +24,21 @@ export interface DecoratorSelectSubscribeOptionsInterface {
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function StoreSelect(
-  selector: Selector<any, any>,
-  options: DecoratorSelectSubscribeOptionsInterface = { shouldDistinctUntilChanged: true }
-) {
+export function StoreSelect(selector: Selector<any, any>, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      if (!(this.store as Store<any>)) {
-        throw new Error(`The class instance does not contain the store property`);
-      }
+      options = { ...decoratorOptionDefaultValues, ...options };
+
+      checkIfHasPropertyStore.call(this);
 
       const privateKeyName = '_' + key;
 
       if (!this[privateKeyName]) {
         let selection = this.store.pipe(select(selector));
 
-        if (options && options.shouldDistinctUntilChanged) {
-          selection = selection.pipe(distinctUntilObjectChanged(options.compareFunction));
-        }
+        selection = applyPipes(selection, options);
+        logValues.call(this, selection, key, options);
+
         this[privateKeyName] = selection;
       }
 
@@ -73,28 +73,23 @@ export function StoreSelect(
  * public currency: CurrencyInterface;
  * ```
  */
-export function StoreSubscribe(
-  selector: Selector<any, any>,
-  options: DecoratorSelectSubscribeOptionsInterface = { shouldDistinctUntilChanged: true }
-) {
+export function StoreSubscribe(selector: Selector<any, any>, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      if (!(this.store as Store<any>)) {
-        throw new Error(`The class instance does not contain the store property`);
-      }
-      if (!(this.subscriptions as Subscription)) {
-        throw new Error(`The class ${this.prototype.constructor.name} does not contain the subscription property`);
-      }
+      options = { ...decoratorOptionDefaultValues, ...options };
+
+      checkIfHasPropertyStore.call(this);
+      checkIfHasPropertySubscriptions.call(this, options);
 
       const privateKeyName = '_' + key;
 
       if (!this[privateKeyName]) {
         let selection = this.store.pipe(select(selector));
-        if (options && options.shouldDistinctUntilChanged) {
-          selection = selection.pipe(distinctUntilObjectChanged(options.compareFunction));
-        }
 
-        this.subscriptions.add(
+        selection = applyPipes(selection, options);
+        logValues.call(this, selection, key, options);
+
+        this[options.subscriptionsCollector].add(
           selection.subscribe(data => {
             this[privateKeyName] = data;
           })
@@ -134,9 +129,7 @@ export function StoreDispatch<T extends any>(Action: T) {
   return function(target: any, key: string, descriptor: PropertyDescriptor) {
     descriptor.writable = false;
     descriptor.value = function(payload: any = undefined) {
-      if (!(this.store as Store<any>)) {
-        throw new Error(`The class instance does not contain the store property`);
-      }
+      checkIfHasPropertyStore.call(this);
 
       this.store.dispatch(new Action(payload));
     };
