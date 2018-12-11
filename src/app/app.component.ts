@@ -12,7 +12,7 @@ import { CounterFacadeService } from './store/facades/counter.facade.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent extends WithSubscriptions implements OnDestroy {
-  @Select('counterFacadeService', 'count$')
+  @Select('counterFacadeService', 'count$', {log: true})
   public count$: Observable<number>;
 
   @Subscribe('counterFacadeService', 'count$')

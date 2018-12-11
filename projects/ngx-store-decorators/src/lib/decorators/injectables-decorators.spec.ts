@@ -2,6 +2,7 @@ import { first } from 'rxjs/operators';
 import { of, Subscription, Observable } from 'rxjs';
 
 import { Select, Subscribe } from './injectables-decorators';
+import { StoreSubscribe } from './store-decorators';
 
 let SampleClass;
 let SampleClassWithoutSubscriptions;
@@ -14,6 +15,10 @@ beforeEach(() => {
     public observableInProperty: Observable<number> = of(21);
     public observableInMethod(): Observable<number> {
       return of(21);
+    }
+
+    public methodNotReturnObservable() {
+      return 1;
     }
   }
 
@@ -80,6 +85,20 @@ describe('Decorator Select', () => {
 
     expect(error).toBeTruthy();
   });
+
+  it('should trow an error when user try to set value to decorated property', () => {
+    const decoratorFn = Select('sampleService', 'observableInProperty');
+
+    let error;
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      sampleClassInstance.sampleProperty$ = 1;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
 });
 
 describe('Decorator Subscribe', () => {
@@ -117,7 +136,7 @@ describe('Decorator Subscribe', () => {
     expect(error).toBeTruthy();
   });
 
-  it('should return throw an error when method or property on injection does not exist', () => {
+  it('should throw an error when method or property on injection does not exist', () => {
     const decoratorFn = Subscribe('sampleService2', 'observableInMethod');
     let error;
 
@@ -138,6 +157,50 @@ describe('Decorator Subscribe', () => {
     try {
       decoratorFn(sampleClassWithoutSubscriptionsInstance, 'sampleProperty$');
       const values$ = sampleClassWithoutSubscriptionsInstance.sampleProperty$;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
+
+  it('should return throw an error when subscriptions property does not exist', () => {
+    const decoratorFn = Subscribe('sampleService', 'observableInMethod', {
+      subscriptionsCollector: 'wrongPropertyName'
+    });
+    let error;
+
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      const values$ = sampleClassInstance.sampleProperty$;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
+
+  it('should return throw an error when property or method does not return Observable', () => {
+    const decoratorFn = Subscribe('sampleService', 'methodNotReturnObservable');
+    let error;
+
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      const values = sampleClassInstance.sampleProperty$;
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+  });
+
+  it('should trow an error when user try to set value to decorated property', () => {
+    const decoratorFn = Subscribe('sampleService', 'observableInProperty');
+
+    let error;
+    try {
+      decoratorFn(sampleClassInstance, 'sampleProperty$');
+      sampleClassInstance.sampleProperty$ = 1;
     } catch (e) {
       error = e;
     }
