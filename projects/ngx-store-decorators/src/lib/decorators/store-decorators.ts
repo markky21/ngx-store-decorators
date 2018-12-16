@@ -1,14 +1,12 @@
-import { select, Selector, Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
-
-import { distinctUntilObjectChanged } from '../rxjs-pipes/distinctUntilObjectChanged';
+import { select, Selector } from '@ngrx/store';
 import {
   applyPipes,
   checkIfHasPropertyStore,
   checkIfHasPropertySubscriptions,
-  decoratorOptionDefaultValues,
   DecoratorOptionInterface,
-  logValues
+  decoratorStoreOptionDefaultValues,
+  logValues,
+  subscribeTo
 } from '../common';
 
 /**
@@ -27,19 +25,17 @@ import {
 export function StoreSelect(selector: Selector<any, any>, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      options = { ...decoratorOptionDefaultValues, ...options };
-
-      checkIfHasPropertyStore.call(this);
-
       const privateKeyName = '_' + key;
 
-      if (!this[privateKeyName]) {
+      if (!this.hasOwnProperty(privateKeyName)) {
+        options = { ...decoratorStoreOptionDefaultValues, ...options };
+        checkIfHasPropertyStore.call(this);
+
         let selection = this.store.pipe(select(selector));
-
-        selection = applyPipes(selection, options);
-        logValues.call(this, selection, key, options);
-
+        selection = applyPipes.call(this, selection, options);
         this[privateKeyName] = selection;
+
+        logValues.call(this, selection, key, options);
       }
 
       return this[privateKeyName];
@@ -76,24 +72,18 @@ export function StoreSelect(selector: Selector<any, any>, options?: DecoratorOpt
 export function StoreSubscribe(selector: Selector<any, any>, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      options = { ...decoratorOptionDefaultValues, ...options };
-
-      checkIfHasPropertyStore.call(this);
-      checkIfHasPropertySubscriptions.call(this, options);
-
       const privateKeyName = '_' + key;
 
-      if (!this[privateKeyName]) {
+      if (!this.hasOwnProperty(privateKeyName)) {
+        options = { ...decoratorStoreOptionDefaultValues, ...options };
+        checkIfHasPropertyStore.call(this);
+        checkIfHasPropertySubscriptions.call(this, options);
+
         let selection = this.store.pipe(select(selector));
+        selection = applyPipes.call(this, selection, options);
+        subscribeTo.call(this, selection, privateKeyName, options);
 
-        selection = applyPipes(selection, options);
         logValues.call(this, selection, key, options);
-
-        this[options.subscriptionsCollector].add(
-          selection.subscribe(data => {
-            this[privateKeyName] = data;
-          })
-        );
       }
 
       return this[privateKeyName];

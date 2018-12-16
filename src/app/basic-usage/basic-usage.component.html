@@ -1,0 +1,26 @@
+
+<h1>Basic usage</h1>
+<hr>
+
+<p>public count$: {{ count$ | async }}</p>
+<p>public count: {{ count }}</p>
+<p>public counterFacadeService.count$: {{ counterFacadeService.count$ | async }}</p>
+<p>public counterFacadeService.count: {{ counterFacadeService.count }}</p>
+
+<button
+  mat-raised-button
+  (click)="counterFacadeService.counterIncrement()"
+>counterIncrement()</button>
+<button
+  mat-raised-button
+  (click)="counterFacadeService.counterDecrement()"
+>counterDecrement()</button>
+<button
+  mat-raised-button
+  (click)="counterFacadeService.counterReset()"
+>counterReset()</button>
+<button
+  mat-raised-button
+  (click)="counterFacadeService.counterSet(10)"
+>counterSet(10)</button>
+

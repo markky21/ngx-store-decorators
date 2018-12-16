@@ -1,4 +1,5 @@
 import { from } from 'rxjs';
+
 import { distinctUntilObjectChanged } from './distinctUntilObjectChanged';
 
 const myArrayWithDuplicatesInARow = from([1, 1, 2, 2, 3, 1, 2, 3]);
