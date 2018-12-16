@@ -27,6 +27,7 @@
     "npm:publish": "npm run npm:create-package && npm publish",
     "test:lib": "ng test NgxStoreDecorators",
     "test:lib:raport": "ng test NgxStoreDecorators --code-coverage",
+    "test:lib:raport:headless": "ng test NgxStoreDecorators --code-coverage --watch=false --browsers=ChromeHeadless",
     "test:lib:show": "http-server -c-1 -o -p 9875 ./coverage"
   },
   "private": true,

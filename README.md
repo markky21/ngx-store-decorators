@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/markky21/ngx-store-decorators.svg?branch=master)](https://travis-ci.org/markky21/ngx-store-decorators) [![Coverage Status](https://coveralls.io/repos/github/markky21/ngx-store-decorators/badge.svg?branch=master)](https://coveralls.io/github/markky21/ngx-store-decorators?branch=master)
+
 # NgxStoreDecorators
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.1.2.
