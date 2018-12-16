@@ -1,14 +1,15 @@
-import { Observable, isObservable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import {
   applyPipes,
   checkIfHasInjection,
   checkIfHasPropertySubscriptions,
   checkIfInjectionHasMethodOrProperty,
-  decoratorOptionDefaultValues,
+  decoratorInjectableOptionDefaultValues,
   DecoratorOptionInterface,
+  getObservable,
   logValues,
-  throwIsNotAnObservable,
+  subscribeTo,
   throwIsReadonly
 } from '../common';
 
@@ -29,31 +30,19 @@ import {
 export function Select(injection: string, methodOrProperty: string, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      options = { ...decoratorOptionDefaultValues, ...options };
-
-      checkIfHasInjection.call(this, injection);
-      checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
-
       const privateKeyName = '_' + key;
 
-      if (!this[privateKeyName]) {
-        const method = this[injection][methodOrProperty];
+      if (!this.hasOwnProperty(privateKeyName)) {
+        options = { ...decoratorInjectableOptionDefaultValues, ...options };
+        checkIfHasInjection.call(this, injection);
+        checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+
         let selection: Observable<any>;
-
-        if (isObservable(method)) {
-          selection = this[injection][methodOrProperty];
-        } else {
-          try {
-            selection = this[injection][methodOrProperty]();
-          } catch (e) {
-            throwIsNotAnObservable(injection, methodOrProperty);
-          }
-        }
-
-        selection = applyPipes(selection, options);
-        logValues.call(this, selection, key, options);
-
+        selection = getObservable(this[injection][methodOrProperty], injection, methodOrProperty);
+        selection = applyPipes.call(this, selection, options);
         this[privateKeyName] = selection;
+
+        logValues.call(this, selection, key, options);
       }
 
       return this[privateKeyName];
@@ -91,36 +80,20 @@ export function Select(injection: string, methodOrProperty: string, options?: De
 export function Subscribe(injection: string, methodOrProperty: string, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
-      options = { ...decoratorOptionDefaultValues, ...options };
-
-      checkIfHasInjection.call(this, injection);
-      checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
-      checkIfHasPropertySubscriptions.call(this, options);
-
       const privateKeyName = '_' + key;
 
-      if (!this[privateKeyName]) {
-        const method = this[injection][methodOrProperty];
+      if (!this.hasOwnProperty(privateKeyName)) {
+        options = { ...decoratorInjectableOptionDefaultValues, ...options };
+        checkIfHasInjection.call(this, injection);
+        checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+        checkIfHasPropertySubscriptions.call(this, options);
+
         let selection: Observable<any>;
+        selection = getObservable(this[injection][methodOrProperty], injection, methodOrProperty);
+        selection = applyPipes.call(this, selection, options);
+        subscribeTo.call(this, selection, privateKeyName, options);
 
-        if (isObservable(method)) {
-          selection = this[injection][methodOrProperty];
-        } else {
-          try {
-            selection = this[injection][methodOrProperty]();
-          } catch (e) {
-            throwIsNotAnObservable(injection, methodOrProperty);
-          }
-        }
-
-        selection = applyPipes(selection, options);
         logValues.call(this, selection, key, options);
-
-        this[options.subscriptionsCollector].add(
-          selection.subscribe(data => {
-            this[privateKeyName] = data;
-          })
-        );
       }
 
       return this[privateKeyName];

@@ -1,0 +1,132 @@
+<h1>Option configurations</h1>
+<hr>
+
+<article>
+  <h4>log</h4>
+  <p>You can log changes in the stream, even without having to subscribe</p>
+
+  <pre>
+@Select('appSampleService', 'observableWithLog$', {{'{'}}log: true})
+public observableWithLog$: Observable{{'<'}}boolean>;
+</pre>
+
+  <pre>observableWithLog$: {{ observableWithLog$ | async | json}}</pre>
+  <button
+    mat-raised-button
+    (click)="toggleObservableWithLog()"
+  >toggleObservableWithLog()
+  </button>
+</article>
+
+<hr>
+
+<article>
+  <h4>pipe</h4>
+  <p>You can add RxJs operators to the pipe (e.g.: delay)</p>
+
+  <pre>
+@Subscribe('counterFacadeService', 'count$', {{'{'}}pipe: [delay(1000)]})
+public observableWithOperator: number;
+</pre>
+
+  <pre>observableWithOperator: {{ observableWithOperator | json}}</pre>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.counterIncrement()"
+  >counterIncrement()
+  </button>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.counterDecrement()"
+  >counterDecrement()
+  </button>
+</article>
+
+<hr>
+
+<article>
+  <h4>subscriptionsCollector</h4>
+  <p>You can indicate your own subscription collector</p>
+
+  <pre>
+@Subscribe('counterFacadeService', 'count$', {{'{'}}subscriptionsCollector: 'customSubscriptionsCollector'})
+public observableCustomSubscriptionsCollector: number;
+</pre>
+
+  <pre>observableCustomSubscriptionsCollector: {{ observableCustomSubscriptionsCollector | json}}</pre>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.counterIncrement()"
+  >counterIncrement()
+  </button>
+  <button
+    mat-raised-button
+    (click)="unsubscribeCustomSubscriptionsCollector()"
+  >unsubscribeCustomSubscriptionsCollector()
+  </button>
+</article>
+
+<hr>
+
+<article>
+  <h4>takeUntil</h4>
+  <p>In case if you want to use takeUntil as a unsubscription tool</p>
+
+  <pre>
+@Subscribe('counterFacadeService', 'count$', {{'{'}}takeUntil: 'takeUntilSubject'})
+public observableWithTakeUntil: number;
+</pre>
+
+  <pre>observableWithTakeUntil: {{ observableWithTakeUntil | json}}</pre>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.counterIncrement()"
+  >counterIncrement()
+  </button>
+  <button
+    mat-raised-button
+    (click)="unsubscribeByTakeUntil()"
+  >unsubscribeByTakeUntil()
+  </button>
+</article>
+
+<hr>
+
+<article>
+  <h4>shouldDistinctUntilChanged</h4>
+  <p>
+    A useful operator especially when using NgRx. Any change in the state of a given reducer emits changes in all
+    selectors, even if the change concerned a different value than the selector listens.</p>
+
+  <pre>
+@Subscribe('counterFacadeService', 'count$', {{'{'}}shouldDistinctUntilChanged: true})
+public observableWithTakeUntil: number;
+  </pre>
+
+  <table style="width: 100%">
+    <tr>
+      <th style="font-weight: normal; text-align: left">With change detection</th>
+      <th style="font-weight: normal; text-align: left">Without change detection</th>
+    </tr>
+    <tr>
+      <td>
+        <pre *ngFor="let log of changesLogWithChangeDetection">{{ log | json}}</pre>
+      </td>
+      <td>
+        <pre *ngFor="let log of changesLogWithoutChangeDetection">{{ log | json}}</pre>
+      </td>
+    </tr>
+  </table>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.counterIncrement()"
+  >counterIncrement()
+  </button>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.secondCounterDecrement()"
+  >secondCounterDecrement()
+  </button>
+</article>
+
+<hr>

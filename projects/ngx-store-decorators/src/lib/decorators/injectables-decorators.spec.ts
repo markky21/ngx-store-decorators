@@ -1,8 +1,11 @@
+//TODO Dopisa testy by sprawdzały czy funckje w getterze sie wyjkonują tylko jeden raz
+//TODO Testy na nowe commony
+//TODO testy na options
+
 import { first } from 'rxjs/operators';
 import { of, Subscription, Observable } from 'rxjs';
 
 import { Select, Subscribe } from './injectables-decorators';
-import { StoreSubscribe } from './store-decorators';
 
 let SampleClass;
 let SampleClassWithoutSubscriptions;
