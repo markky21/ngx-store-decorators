@@ -1,8 +1,23 @@
 import { isObservable, Observable, OperatorFunction, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { takeUntil } from 'rxjs/operators';
 
 import { distinctUntilObjectChanged } from './rxjs-pipes/distinctUntilObjectChanged';
-import { takeUntil } from 'rxjs/operators';
+
+/*
+* Const
+* */
+
+export const ERROR_MESSAGE_NO_STORE = `The class instance does not contain the store property`;
+export const ERROR_MESSAGE_NO_SUBSCRIPTION_COLLECTOR = (className: string) =>
+  `The class ${className} does not contain the subscriptions property`;
+export const ERROR_MESSAGE_NO_INJECTION_INSTANCE = (injection: string) =>
+  `The class instance does not contain the injection: ${injection}`;
+export const ERROR_MESSAGE_NO_METHOD_OR_PROPERTY = (injection: string, methodOrProperty: string) =>
+  `The ${injection} instance does not contain the method or property: ${methodOrProperty}`;
+export const ERROR_MESSAGE_NOT_AN_OBSERVABLE = (injection: string, methodOrProperty: string) =>
+  `this.${injection}.${methodOrProperty} is not a Observable or is not a method returning Observable`;
+export const ERROR_MESSAGE_READONLY = (key: string) => `The "${key}" property is readonly`;
 
 /*
 * Interfaces
@@ -46,34 +61,34 @@ export const decoratorInjectableOptionDefaultValues: DecoratorOptionInterface = 
 
 export function checkIfHasPropertyStore(): void {
   if (!(this.store as Store<any>)) {
-    throw new Error(`The class instance does not contain the store property`);
+    throw new Error(ERROR_MESSAGE_NO_STORE);
   }
 }
 
 export function checkIfHasPropertySubscriptions(options: DecoratorOptionInterface): void {
   if (!(this[options.subscriptionsCollector] as Subscription) && !options.takeUntil) {
-    throw new Error(`The class ${this.prototype.constructor.name} does not contain the subscriptions property`);
+    throw new Error(ERROR_MESSAGE_NO_SUBSCRIPTION_COLLECTOR(this.prototype.constructor.name));
   }
 }
 
 export function checkIfHasInjection(injection: string): void {
   if (!this[injection]) {
-    throw new Error(`The class instance does not contain the injection: ${injection}`);
+    throw new Error(ERROR_MESSAGE_NO_INJECTION_INSTANCE(injection));
   }
 }
 
 export function checkIfInjectionHasMethodOrProperty(injection: string, methodOrProperty: string): void {
   if (!this[injection][methodOrProperty]) {
-    throw new Error(`The ${injection} instance does not contain the method or property: ${methodOrProperty}`);
+    throw new Error(ERROR_MESSAGE_NO_METHOD_OR_PROPERTY(injection, methodOrProperty));
   }
 }
 
 export function throwIsNotAnObservable(injection: string, methodOrProperty: string): void {
-  throw new Error(`this.${injection}.${methodOrProperty} is not a Observable or is not a method returning Observable`);
+  throw new Error(ERROR_MESSAGE_NOT_AN_OBSERVABLE(injection, methodOrProperty));
 }
 
 export function throwIsReadonly(key: string): void {
-  throw new Error(`The "${key}" property is readonly`);
+  throw new Error(ERROR_MESSAGE_READONLY(key));
 }
 
 /*
@@ -81,9 +96,10 @@ export function throwIsReadonly(key: string): void {
 * */
 
 export function applyPipes(selection: Observable<any>, options: DecoratorOptionInterface): Observable<any> {
-  selection = options.shouldDistinctUntilChanged && options.shouldDistinctUntilChanged.enable
-    ? selection.pipe(distinctUntilObjectChanged(options.shouldDistinctUntilChanged.compareFunction))
-    : selection;
+  selection =
+    options.shouldDistinctUntilChanged && options.shouldDistinctUntilChanged.enable
+      ? selection.pipe(distinctUntilObjectChanged(options.shouldDistinctUntilChanged.compareFunction))
+      : selection;
 
   selection = options.takeUntil ? selection.pipe(takeUntil(this[options.takeUntil])) : selection;
 
