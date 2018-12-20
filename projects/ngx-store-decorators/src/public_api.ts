@@ -13,8 +13,3 @@ export * from './lib/classes/with-subscriptions.class';
 * */
 export * from './lib/decorators/injectables-decorators';
 export * from './lib/decorators/store-decorators';
-
-/*
-*  Decorators
-* */
-export * from './lib/rxjs-pipes/distinctUntilObjectChanged';

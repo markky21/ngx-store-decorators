@@ -1,7 +1,6 @@
 import { Action } from '@ngrx/store';
 
 export const DECREMENT = '[COUNTER] DECREMENT';
-export const DECREMENT_SECOND_COUNTER = '[COUNTER] DECREMENT SECOND COUNTER';
 export const INCREMENT = '[COUNTER] INCREMENT';
 export const RESET = '[COUNTER] RESET';
 export const SET = '[COUNTER] SET';
@@ -23,8 +22,4 @@ export class CounterSet implements Action {
   public constructor(public payload: number) {}
 }
 
-export class SecondCounterDecrement implements Action {
-  public readonly type = DECREMENT_SECOND_COUNTER;
-}
-
-export type Actions = CounterIncrement | CounterDecrement | CounterReset | CounterSet | SecondCounterDecrement;
+export type Actions = CounterIncrement | CounterDecrement | CounterReset | CounterSet;

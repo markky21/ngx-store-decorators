@@ -12,7 +12,7 @@ import { debounce, delay } from 'rxjs/operators';
   templateUrl: './option-configurations.component.html',
   styleUrls: ['./option-configurations.component.scss']
 })
-export class OptionConfigurationsComponent extends WithSubscriptions implements OnInit, OnDestroy {
+export class OptionConfigurationsComponent extends WithSubscriptions implements OnDestroy {
   @Select('counterFacadeService', 'count$')
   public countWithLog$: Observable<number>;
 
@@ -31,32 +31,12 @@ export class OptionConfigurationsComponent extends WithSubscriptions implements 
   @Subscribe('counterFacadeService', 'count$', { takeUntil: 'takeUntilSubject' })
   public observableWithTakeUntil: number;
 
-  @Select('counterFacadeService', 'secondCount$')
-  public observableWithChangeDetection$: Observable<number>;
-
-  @Select('counterFacadeService', 'secondCountWithoutChangeDetection$')
-  public observableWithoutChangeDetection$: Observable<number>;
 
   public customSubscriptionsCollector: Subscription = new Subscription();
   public takeUntilSubject = new Subject<true>();
-  public changesLogWithChangeDetection: string[] = [];
-  public changesLogWithoutChangeDetection: string[] = [];
 
   public constructor(public counterFacadeService: CounterFacadeService, public appSampleService: AppSampleService) {
     super();
-  }
-
-  public ngOnInit(): void {
-    this.subscriptions.add(
-      this.observableWithChangeDetection$.subscribe(value => {
-        this.changesLogWithChangeDetection.push(`Emitted value: ${value}`);
-      })
-    );
-    this.subscriptions.add(
-      this.observableWithoutChangeDetection$.subscribe(value => {
-        this.changesLogWithoutChangeDetection.push(`Emitted value: ${value}`);
-      })
-    );
   }
 
   public ngOnDestroy(): void {

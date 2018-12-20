@@ -17,10 +17,6 @@ import { State } from '../reducers/app.reducer';
 export class CounterFacadeService extends StoreFacade {
   @StoreSelect(selectors.getCount) public count$: Observable<number>;
 
-  @StoreSelect(selectors.getSecondCount) public secondCount$: Observable<number>;
-  @StoreSelect(selectors.getSecondCount, { shouldDistinctUntilChanged: { enable: false } })
-  public secondCountWithoutChangeDetection$: Observable<number>;
-
   @StoreSubscribe(selectors.getCount) public count: number;
 
   public constructor(protected store: Store<State>) {
@@ -38,7 +34,4 @@ export class CounterFacadeService extends StoreFacade {
 
   @StoreDispatch(actions.CounterReset)
   public counterReset() {}
-
-  @StoreDispatch(actions.SecondCounterDecrement)
-  public secondCounterDecrement() {}
 }

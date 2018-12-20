@@ -8,7 +8,7 @@
   <pre>
 @Select('appSampleService', 'observableWithLog$', {{'{'}}log: true})
 public observableWithLog$: Observable{{'<'}}boolean>;
-</pre>
+  </pre>
 
   <pre>observableWithLog$: {{ observableWithLog$ | async | json}}</pre>
   <button
@@ -87,45 +87,6 @@ public observableWithTakeUntil: number;
     mat-raised-button
     (click)="unsubscribeByTakeUntil()"
   >unsubscribeByTakeUntil()
-  </button>
-</article>
-
-<hr>
-
-<article>
-  <h4>shouldDistinctUntilChanged</h4>
-  <p>
-    A useful operator especially when using NgRx. Any change in the state of a given reducer emits changes in all
-    selectors, even if the change concerned a different value than the selector listens.</p>
-
-  <pre>
-@Subscribe('counterFacadeService', 'count$', {{'{'}}shouldDistinctUntilChanged: true})
-public observableWithTakeUntil: number;
-  </pre>
-
-  <table style="width: 100%">
-    <tr>
-      <th style="font-weight: normal; text-align: left">With change detection</th>
-      <th style="font-weight: normal; text-align: left">Without change detection</th>
-    </tr>
-    <tr>
-      <td>
-        <pre *ngFor="let log of changesLogWithChangeDetection">{{ log | json}}</pre>
-      </td>
-      <td>
-        <pre *ngFor="let log of changesLogWithoutChangeDetection">{{ log | json}}</pre>
-      </td>
-    </tr>
-  </table>
-  <button
-    mat-raised-button
-    (click)="counterFacadeService.counterIncrement()"
-  >counterIncrement()
-  </button>
-  <button
-    mat-raised-button
-    (click)="counterFacadeService.secondCounterDecrement()"
-  >secondCounterDecrement()
   </button>
 </article>
 

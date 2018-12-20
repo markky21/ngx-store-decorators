@@ -2,8 +2,6 @@ import { isObservable, Observable, OperatorFunction, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { takeUntil } from 'rxjs/operators';
 
-import { distinctUntilObjectChanged } from './rxjs-pipes/distinctUntilObjectChanged';
-
 /*
 * Const
 * */
@@ -28,10 +26,6 @@ export interface DecoratorOptionInterface {
   pipe?: OperatorFunction<any, any>[];
   subscriptionsCollector?: string;
   takeUntil?: string;
-  shouldDistinctUntilChanged?: {
-    enable: boolean;
-    compareFunction?: (p: any, q: any) => boolean;
-  };
 }
 
 /*
@@ -39,17 +33,13 @@ export interface DecoratorOptionInterface {
 * */
 
 export const decoratorOptionDefaultValues: DecoratorOptionInterface = {
-  shouldDistinctUntilChanged: {
-    enable: false
-  },
   pipe: [],
   log: false,
   subscriptionsCollector: 'subscriptions'
 };
 
 export const decoratorStoreOptionDefaultValues: DecoratorOptionInterface = {
-  ...decoratorOptionDefaultValues,
-  shouldDistinctUntilChanged: { enable: true }
+  ...decoratorOptionDefaultValues
 };
 export const decoratorInjectableOptionDefaultValues: DecoratorOptionInterface = {
   ...decoratorOptionDefaultValues
@@ -96,11 +86,6 @@ export function throwIsReadonly(key: string): void {
 * */
 
 export function applyPipes(selection: Observable<any>, options: DecoratorOptionInterface): Observable<any> {
-  selection =
-    options.shouldDistinctUntilChanged && options.shouldDistinctUntilChanged.enable
-      ? selection.pipe(distinctUntilObjectChanged(options.shouldDistinctUntilChanged.compareFunction))
-      : selection;
-
   selection = options.takeUntil ? selection.pipe(takeUntil(this[options.takeUntil])) : selection;
 
   return options.pipe.length ? selection.pipe(...(options.pipe as [OperatorFunction<any, any>])) : selection;

@@ -61,12 +61,11 @@ describe('Utils', () => {
   it('applyPipes() should apply pipes', () => {
     const result = common.applyPipes.call({ takeUntilSubject: new Subject() }, new Observable(), {
       ...common.decoratorOptionDefaultValues,
-      shouldDistinctUntilChanged: { enable: true },
       takeUntil: 'takeUntilSubject',
       pipe: [delay(0)]
     });
 
-    expect(Object.getPrototypeOf(result.source.source.operator).constructor.name).toBe('DistinctUntilChangedOperator');
+    expect(Object.getPrototypeOf(result.source.operator).constructor.name).toBe('TakeUntilOperator');
   });
 
   it('logValues() should subscribe to observable and log value', () => {
