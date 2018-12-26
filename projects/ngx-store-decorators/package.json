@@ -12,7 +12,7 @@
     "NgRx"
   ],
   "author": "Marcin Mirecki <markky21@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/markky21/ngx-store-decorators/issues"
   },
