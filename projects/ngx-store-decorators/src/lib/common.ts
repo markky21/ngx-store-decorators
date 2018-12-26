@@ -1,5 +1,5 @@
 import { isObservable, Observable, OperatorFunction, Subscription } from 'rxjs';
-import { Store } from '@ngrx/store';
+import { select, Selector, Store } from '@ngrx/store';
 import { takeUntil } from 'rxjs/operators';
 
 /*
@@ -116,6 +116,15 @@ export function getObservable(target: any, injection: string, methodOrProperty: 
   }
 }
 
+export function getObservableFromSelector(...arg): Observable<any> {
+  let selection = this.context.store.pipe(select(isSelector(this.selector) ? this.selector : this.selector(...arg)));
+
+  selection = applyPipes.call(this.context, selection, this.options);
+
+  logValues.call(this.context, selection, this.key, this.options);
+  return selection;
+}
+
 export function subscribeTo(selection: Observable<any>, privateKeyName: string, options: DecoratorOptionInterface) {
   const subscription = selection.subscribe(data => {
     this[privateKeyName] = data;
@@ -124,4 +133,8 @@ export function subscribeTo(selection: Observable<any>, privateKeyName: string, 
   if (options.subscriptionsCollector) {
     this[options.subscriptionsCollector].add(subscription);
   }
+}
+
+export function isSelector(selector: Selector<any, any>) {
+  return selector.length === 0;
 }

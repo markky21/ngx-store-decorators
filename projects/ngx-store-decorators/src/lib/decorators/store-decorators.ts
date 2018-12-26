@@ -1,11 +1,11 @@
-import { select, Selector } from '@ngrx/store';
+import { Selector } from '@ngrx/store';
 import {
-  applyPipes,
   checkIfHasPropertyStore,
   checkIfHasPropertySubscriptions,
   DecoratorOptionInterface,
   decoratorStoreOptionDefaultValues,
-  logValues,
+  getObservableFromSelector,
+  isSelector,
   subscribeTo
 } from '../common';
 
@@ -22,7 +22,7 @@ import {
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function StoreSelect(selector: Selector<any, any>, options?: DecoratorOptionInterface) {
+export function StoreSelect(selector: Selector<any, any> | any, options?: DecoratorOptionInterface) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
@@ -31,11 +31,16 @@ export function StoreSelect(selector: Selector<any, any>, options?: DecoratorOpt
         options = { ...decoratorStoreOptionDefaultValues, ...options };
         checkIfHasPropertyStore.call(this);
 
-        let selection = this.store.pipe(select(selector));
-        selection = applyPipes.call(this, selection, options);
-        this[privateKeyName] = selection;
+        const context = {
+          context: this,
+          selector,
+          key,
+          options
+        };
 
-        logValues.call(this, selection, key, options);
+        this[privateKeyName] = isSelector(selector)
+          ? getObservableFromSelector.call(context)
+          : getObservableFromSelector.bind(context);
       }
 
       return this[privateKeyName];
@@ -79,11 +84,18 @@ export function StoreSubscribe(selector: Selector<any, any>, options?: Decorator
         checkIfHasPropertyStore.call(this);
         checkIfHasPropertySubscriptions.call(this, options);
 
-        let selection = this.store.pipe(select(selector));
-        selection = applyPipes.call(this, selection, options);
-        subscribeTo.call(this, selection, privateKeyName, options);
+        const context = {
+          context: this,
+          selector,
+          key,
+          options
+        };
 
-        logValues.call(this, selection, key, options);
+        let selection = isSelector(selector)
+          ? getObservableFromSelector.call(context)
+          : getObservableFromSelector.bind(context);
+
+        subscribeTo.call(this, selection, privateKeyName, options);
       }
 
       return this[privateKeyName];

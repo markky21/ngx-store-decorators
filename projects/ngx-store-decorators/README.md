@@ -79,7 +79,6 @@ Optional needed only for `@StoreSubscribe()` and `@Subscribe` decorators.
 You can handle subscriptions by **takeUntil** operator. 
 Here you just pass a name of the class property witch should be **Subject<boolean>** instance 
 
-
 ## Demo
 
 To see decorators and classes usage in real app run `ng serve` for a dev server. Navigate to `http://localhost:4200/`.

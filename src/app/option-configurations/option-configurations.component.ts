@@ -5,7 +5,7 @@ import { CounterFacadeService } from '../store/facades/counter.facade.service';
 import { Select, Subscribe } from '../../../projects/ngx-store-decorators/src/lib/decorators/injectables-decorators';
 import { WithSubscriptions } from '../../../projects/ngx-store-decorators/src/lib/classes/with-subscriptions.class';
 import { AppSampleService } from '../app-sample.service';
-import { debounce, delay } from 'rxjs/operators';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-option-configurations',

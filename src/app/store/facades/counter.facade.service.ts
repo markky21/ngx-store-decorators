@@ -17,6 +17,8 @@ import { State } from '../reducers/app.reducer';
 export class CounterFacadeService extends StoreFacade {
   @StoreSelect(selectors.getCount) public count$: Observable<number>;
 
+  @StoreSelect(selectors.getCountMutliplyBy) public countMultiplyBy$: (multiplyBy: number) => Observable<number>;
+
   @StoreSubscribe(selectors.getCount) public count: number;
 
   public constructor(protected store: Store<State>) {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Select, Subscribe } from '../../../projects/ngx-store-decorators/src/lib/decorators/injectables-decorators';
@@ -10,12 +10,14 @@ import { WithSubscriptions } from '../../../projects/ngx-store-decorators/src/li
   templateUrl: './basic-usage.component.html',
   styleUrls: ['./basic-usage.component.scss']
 })
-export class BasicUsageComponent extends WithSubscriptions implements OnDestroy {
+export class BasicUsageComponent extends WithSubscriptions implements OnInit, OnDestroy {
   @Select('counterFacadeService', 'count$')
   public count$: Observable<number>;
 
   @Subscribe('counterFacadeService', 'count$')
   public count: number;
+
+  public countMultiplyBy$: Observable<number>;
 
   public constructor(public counterFacadeService: CounterFacadeService) {
     super();
@@ -23,5 +25,9 @@ export class BasicUsageComponent extends WithSubscriptions implements OnDestroy 
 
   public ngOnDestroy(): void {
     this.unsubscribeAll();
+  }
+
+  public ngOnInit(): void {
+    this.countMultiplyBy$ = this.counterFacadeService.countMultiplyBy$(3);
   }
 }
