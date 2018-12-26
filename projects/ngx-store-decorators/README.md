@@ -1,6 +1,6 @@
 # NgxStoreDecorators for Angular [![Build Status](https://travis-ci.org/markky21/ngx-store-decorators.svg?branch=master)](https://travis-ci.org/markky21/ngx-store-decorators) [![Coverage Status](https://coveralls.io/repos/github/markky21/ngx-store-decorators/badge.svg?branch=master)](https://coveralls.io/github/markky21/ngx-store-decorators?branch=master)
 
-[![NPM](https://nodei.co/npm/ngx-store-decorators.png?downloads=true&stars=true)](https://nodei.co/npm/ngx-chips/)
+[![NPM](https://nodei.co/npm/ngx-store-decorators.png?downloads=true&stars=true)](https://nodei.co/npm/ngx-store-decorators/)
 
 NgxStoreDecorators is a set of useful decorators and classes for quickly create NgRx store facades, 
 creating observables and subscribing to them. 
