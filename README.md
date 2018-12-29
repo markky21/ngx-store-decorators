@@ -5,12 +5,14 @@
 NgxStoreDecorators is a set of useful decorators and classes for quickly create NgRx store facades, 
 creating observables and subscribing to them. 
 
-This package introduce `@StoreSelect()`, `@StoreSubscribe()`, `@StoreDispatch()` decorators and `StoreFacade()` abstract class for NgRx store maintaining,
-also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract class to create observables and handle subscriptions.
+This package introduce `@StoreSelect()`, `@StoreSubscribe()`, `@StoreDispatch()` decorators 
+and `StoreFacade` abstract class for NgRx store maintaining,
+also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract class 
+to create observables and handle subscriptions.
 
 ##Example
 1. Sample store facade service:
-  ```
+  ```typescript
   @Injectable()
   export class CounterFacadeService extends StoreFacade {
     @StoreSelect(selectors.getCount) 
@@ -30,15 +32,48 @@ also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract cla
     public counterSet(payload: number) {}
   }
   ```
+  without Store decorators and `StoreFacade` abstract class:
+  
+  ```typescript
+  @Injectable()
+  export class CounterFacadeService {
+  
+    public count$: Observable<number>;
+    
+    public countMultiplyBy$: (multiplyBy: number) => Observable<number>;
+    
+    public count: number;
+  
+    public readonly subscriptions = new Subscription();
+    
+    public constructor(protected store: Store<State>) {
+      this.count$ = this.store.pipe(select(selectors.getCount));
+      
+      this.countMultiplyBy$ = (multiplyBy: number) => this.store.pipe(select(selectors.getCountMutliplyBy(multiplyBy)));
+      
+      this.subscriptions.add(
+        this.store.pipe(select(selectors.getCount))
+        .subscribe(value => this.count = value));
+    }
+  
+    public counterSet(payload: number): void {
+      this.store.dispatch(new actions.CounterSet(payload))
+    }
+    
+    public unsubscribeAll(): void {
+      this.subscriptions.unsubscribe();
+    }
+  }
+  ```
 
 2. Sample usage in component or service:
-  ```
+  ```typescript
   @Component({
     selector: 'app-basic-usage',
     templateUrl: './basic-usage.component.html',
     styleUrls: ['./basic-usage.component.scss']
   })
-  export class BasicUsageComponent extends WithSubscriptions implements OnInit, OnDestroy {
+  export class BasicUsageComponent extends WithSubscriptions implements OnDestroy {
     @Select('counterFacadeService', 'count$')
     public count$: Observable<number>;
   
@@ -51,6 +86,42 @@ also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract cla
   
     public ngOnDestroy(): void {
       this.unsubscribeAll();
+    }
+  }
+```
+
+without decorators and `WithSubscriptions` abstract class:
+
+  ```typescript
+  @Component({
+    selector: 'app-basic-usage',
+    templateUrl: './basic-usage.component.html',
+    styleUrls: ['./basic-usage.component.scss']
+  })
+  export class BasicUsageComponent implements OnInit, OnDestroy {
+    public count$: Observable<number>;
+  
+    public count: number;
+    
+    public readonly subscriptions = new Subscription();
+  
+    public constructor(public counterFacadeService: CounterFacadeService) {}
+  
+    public ngOnInit(): void {
+      this.count$ = this.counterFacadeService.count$
+      
+      this.subscriptions.add(
+        this.counterFacadeService.count$
+        .subscribe(value => this.count = value)
+      )
+    }
+    
+    public ngOnDestroy(): void {
+      this.unsubscribeAll();
+    }
+    
+    public unsubscribeAll(): void {
+      this.subscriptions.unsubscribe();
     }
   }
 ```
@@ -81,4 +152,13 @@ Here you just pass a name of the class property witch should be **Subject<boolea
 
 ## Demo
 
-To see decorators and classes usage in real app run `ng serve` for a dev server. Navigate to `http://localhost:4200/`.
+To see decorators and classes usage in real app check 
+[DEMO](https://markky21.github.io/ngx-store-decorators/)
+ or download git repository then type 
+ 
+     npm install // OR
+     yarn add ngx-chips
+     
+     ng serve
+ 
+Then navigate to `http://localhost:4200/`.
