@@ -10,7 +10,7 @@ and `StoreFacade` abstract class for NgRx store maintaining,
 also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract class 
 to create observables and handle subscriptions.
 
-##Example
+## Example
 1. Sample store facade service:
   ```typescript
   @Injectable()
@@ -157,7 +157,7 @@ To see decorators and classes usage in real app check
  or download git repository then type 
  
      npm install // OR
-     yarn add ngx-chips
+     yarn
      
      ng serve
  
