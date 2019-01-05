@@ -23,7 +23,7 @@
   "scripts": {
     "start": "ng serve",
     "build:demo": "ng build --prod --base-href=https://markky21.github.io/ngx-store-decorators/",
-    "build:demo:deploy": "npm run build:demo && ngh --branch=gh-pages",
+    "build:demo:deploy": "npm run build:demo && ngh --dir=dist/demo --branch=gh-pages",
     "build:lib": "ng build NgxStoreDecorators",
     "lint": "ng lint",
     "npm:pack": "cd dist/ngx-store-decorators && npm pack",
