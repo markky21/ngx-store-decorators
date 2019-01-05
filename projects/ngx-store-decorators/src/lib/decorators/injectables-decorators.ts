@@ -1,17 +1,6 @@
 import { Observable } from 'rxjs';
 
-import {
-  applyPipes,
-  checkIfHasInjection,
-  checkIfHasPropertySubscriptions,
-  checkIfInjectionHasMethodOrProperty,
-  decoratorInjectableOptionDefaultValues,
-  DecoratorOptionInterface,
-  getObservable,
-  logValues,
-  subscribeTo,
-  throwIsReadonly
-} from '../common';
+import * as fromCommon from '../common';
 
 /**
  * The decorator who pass Observable from injection method or property to decorated property
@@ -27,29 +16,34 @@ import {
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function Select(injection: string, methodOrProperty: string, options?: DecoratorOptionInterface) {
+export function Select(injection: string, methodOrProperty: string, options?: fromCommon.IDecoratorOptionsSelect) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
-        options = { ...decoratorInjectableOptionDefaultValues, ...options };
-        checkIfHasInjection.call(this, injection);
-        checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+        options = { ...fromCommon.decoratorOptionDefaultValuesForObservable, ...options };
+        fromCommon.checkIfHasInjection.call(this, injection);
+        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
 
         let selection: Observable<any>;
-        selection = getObservable(this[injection][methodOrProperty], injection, methodOrProperty);
-        selection = applyPipes.call(this, selection, options);
+        selection = fromCommon.getObservable(
+          this[injection][methodOrProperty],
+          injection,
+          methodOrProperty,
+          fromCommon.getArgumentsFromOptions(options)
+        );
+        selection = fromCommon.applyPipes.call(this, selection, options);
         this[privateKeyName] = selection;
 
-        logValues.call(this, selection, key, options);
+        fromCommon.logValues.call(this, selection, key, options);
       }
 
       return this[privateKeyName];
     };
 
     const setter = function() {
-      throwIsReadonly(key);
+      fromCommon.throwIsReadonly(key);
     };
 
     if (delete target[key]) {
@@ -57,7 +51,7 @@ export function Select(injection: string, methodOrProperty: string, options?: De
         get: getter,
         set: setter,
         enumerable: true,
-        configurable: true
+        configurable: false
       });
     }
   };
@@ -77,30 +71,39 @@ export function Select(injection: string, methodOrProperty: string, options?: De
  * public currency: CurrencyInterface;
  * ```
  */
-export function Subscribe(injection: string, methodOrProperty: string, options?: DecoratorOptionInterface) {
+export function Subscribe(
+  injection: string,
+  methodOrProperty: string,
+  options?: fromCommon.IDecoratorOptionsForSubscribe
+) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
-        options = { ...decoratorInjectableOptionDefaultValues, ...options };
-        checkIfHasInjection.call(this, injection);
-        checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
-        checkIfHasPropertySubscriptions.call(this, options);
+        options = { ...fromCommon.decoratorOptionDefaultValuesForSubscription, ...options };
+        fromCommon.checkIfHasInjection.call(this, injection);
+        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+        fromCommon.checkIfHasPropertySubscriptions.call(this, options);
 
         let selection: Observable<any>;
-        selection = getObservable(this[injection][methodOrProperty], injection, methodOrProperty);
-        selection = applyPipes.call(this, selection, options);
-        subscribeTo.call(this, selection, privateKeyName, options);
+        selection = fromCommon.getObservable(
+          this[injection][methodOrProperty],
+          injection,
+          methodOrProperty,
+          fromCommon.getArgumentsFromOptions(options)
+        );
+        selection = fromCommon.applyPipes.call(this, selection, options);
+        fromCommon.subscribeTo.call(this, selection, privateKeyName, options);
 
-        logValues.call(this, selection, key, options);
+        fromCommon.logValues.call(this, selection, key, options);
       }
 
       return this[privateKeyName];
     };
 
     const setter = function() {
-      throwIsReadonly(key);
+      fromCommon.throwIsReadonly(key);
     };
 
     if (delete target[key]) {
@@ -108,7 +111,58 @@ export function Subscribe(injection: string, methodOrProperty: string, options?:
         get: getter,
         set: setter,
         enumerable: true,
-        configurable: true
+        configurable: false
+      });
+    }
+  };
+}
+
+/**
+ * The decorator who get the value from injected class method or property
+ *
+ * @param injection - injection name
+ * @param methodOrProperty - method or property name
+ * @param options - options
+ * @return values from return
+ *
+ * Sample usage:
+ * ```
+ * @Get('sampleService', 'currency')
+ * public currency: CurrencyInterface;
+ * ```
+ */
+export function Get(injection: string, methodOrProperty: string, options?: fromCommon.IDecoratorOptionsForGet) {
+  return function(target, key) {
+    const getter = function() {
+      const privateKeyName = '_' + key;
+
+      if (!this.hasOwnProperty(privateKeyName)) {
+        fromCommon.checkIfHasInjection.call(this, injection);
+        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+
+        Object.defineProperty(this, privateKeyName, {
+          get: fromCommon.isFunction(this[injection][methodOrProperty])
+            ? () => this[injection][methodOrProperty](...fromCommon.getArgumentsFromOptions(options))
+            : () => this[injection][methodOrProperty],
+          set: undefined,
+          enumerable: false,
+          configurable: false
+        });
+      }
+
+      return this[privateKeyName];
+    };
+
+    const setter = function() {
+      fromCommon.throwIsReadonly(key);
+    };
+
+    if (delete target[key]) {
+      Object.defineProperty(target, key, {
+        get: getter,
+        set: setter,
+        enumerable: true,
+        configurable: false
       });
     }
   };

@@ -91,3 +91,22 @@ public observableWithTakeUntil: number;
 </article>
 
 <hr>
+
+<article>
+  <h4>args</h4>
+  <p>If you want to resolve injection method with passed argument</p>
+
+  <pre>
+@Get('counterFacadeService', 'countFunctionWithArg', {{'{'}}args: [3]})
+public getCountFunctionWithArguments: number;
+</pre>
+
+  <pre>getCountFunctionWithArguments: {{ getCountFunctionWithArguments | json}}</pre>
+  <button
+    mat-raised-button
+    (click)="counterFacadeService.counterIncrement()"
+  >counterIncrement()
+  </button>
+</article>
+
+<hr>

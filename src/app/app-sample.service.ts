@@ -9,8 +9,8 @@ export class AppSampleService {
   public observableWithLog$ = new BehaviorSubject<boolean>(true);
 
   public toggleObservableWithLog(): void {
-    this.observableWithLog$.pipe(first()).subscribe(val => {
-      this.observableWithLog$.next(!val);
+    this.observableWithLog$.pipe(first()).subscribe((value: any) => {
+      this.observableWithLog$.next(!value);
     });
   }
 }

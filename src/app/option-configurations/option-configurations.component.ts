@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { CounterFacadeService } from '../store/facades/counter.facade.service';
-import { Select, Subscribe } from '../../../projects/ngx-store-decorators/src/lib/decorators/injectables-decorators';
+import { Get, Select, Subscribe } from '../../../projects/ngx-store-decorators/src/lib/decorators/injectables-decorators';
 import { WithSubscriptions } from '../../../projects/ngx-store-decorators/src/lib/classes/with-subscriptions.class';
 import { AppSampleService } from '../app-sample.service';
 import { delay } from 'rxjs/operators';
@@ -31,6 +31,8 @@ export class OptionConfigurationsComponent extends WithSubscriptions implements 
   @Subscribe('counterFacadeService', 'count$', { takeUntil: 'takeUntilSubject' })
   public observableWithTakeUntil: number;
 
+  @Get('counterFacadeService', 'countFunctionWithArg', {args: [3]})
+  public getCountFunctionWithArguments: number;
 
   public customSubscriptionsCollector: Subscription = new Subscription();
   public takeUntilSubject = new Subject<true>();

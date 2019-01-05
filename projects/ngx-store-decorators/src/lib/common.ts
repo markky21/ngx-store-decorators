@@ -14,35 +14,51 @@ export const ERROR_MESSAGE_NO_INJECTION_INSTANCE = (injection: string) =>
 export const ERROR_MESSAGE_NO_METHOD_OR_PROPERTY = (injection: string, methodOrProperty: string) =>
   `The ${injection} instance does not contain the method or property: ${methodOrProperty}`;
 export const ERROR_MESSAGE_NOT_AN_OBSERVABLE = (injection: string, methodOrProperty: string) =>
-  `this.${injection}.${methodOrProperty} is not a Observable or is not a method returning Observable`;
+  `The ${methodOrProperty} property of ${injection} instance is not a Observable or is not a method returning Observable`;
 export const ERROR_MESSAGE_READONLY = (key: string) => `The "${key}" property is readonly`;
 
 /*
 * Interfaces
 * */
 
-export interface DecoratorOptionInterface {
+export interface IDecoratorOptionsForGet {
+  args?: any[];
+}
+
+export interface IDecoratorOptionsForObservable {
   log?: boolean;
-  pipe?: OperatorFunction<any, any>[];
+  pipe?: Array<OperatorFunction<any, any>>;
+}
+
+export interface IDecoratorOptionsForSubscription extends IDecoratorOptionsForObservable {
   subscriptionsCollector?: string;
   takeUntil?: string;
 }
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsSelect extends IDecoratorOptionsForGet, IDecoratorOptionsForObservable {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsForSubscribe extends IDecoratorOptionsForGet, IDecoratorOptionsForSubscription {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsForStoreSelect extends IDecoratorOptionsForObservable {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsForStoreSubscribe extends IDecoratorOptionsForSubscription {}
 
 /*
 * Definitions
 * */
 
-export const decoratorOptionDefaultValues: DecoratorOptionInterface = {
+export const decoratorOptionDefaultValuesForObservable: IDecoratorOptionsForObservable = {
   pipe: [],
-  log: false,
-  subscriptionsCollector: 'subscriptions'
+  log: false
 };
 
-export const decoratorStoreOptionDefaultValues: DecoratorOptionInterface = {
-  ...decoratorOptionDefaultValues
-};
-export const decoratorInjectableOptionDefaultValues: DecoratorOptionInterface = {
-  ...decoratorOptionDefaultValues
+export const decoratorOptionDefaultValuesForSubscription: IDecoratorOptionsForSubscription = {
+  ...decoratorOptionDefaultValuesForObservable,
+  subscriptionsCollector: 'subscriptions'
 };
 
 /*
@@ -55,20 +71,20 @@ export function checkIfHasPropertyStore(): void {
   }
 }
 
-export function checkIfHasPropertySubscriptions(options: DecoratorOptionInterface): void {
+export function checkIfHasPropertySubscriptions(options: IDecoratorOptionsForSubscription): void {
   if (!(this[options.subscriptionsCollector] as Subscription) && !options.takeUntil) {
-    throw new Error(ERROR_MESSAGE_NO_SUBSCRIPTION_COLLECTOR(this.prototype.constructor.name));
+    throw new Error(ERROR_MESSAGE_NO_SUBSCRIPTION_COLLECTOR(this.constructor.name || this.prototype.constructor.name));
   }
 }
 
 export function checkIfHasInjection(injection: string): void {
-  if (!this[injection]) {
+  if (!this.hasOwnProperty(injection)) {
     throw new Error(ERROR_MESSAGE_NO_INJECTION_INSTANCE(injection));
   }
 }
 
 export function checkIfInjectionHasMethodOrProperty(injection: string, methodOrProperty: string): void {
-  if (!this[injection][methodOrProperty]) {
+  if (!hasOwnProperty(this[injection], methodOrProperty)) {
     throw new Error(ERROR_MESSAGE_NO_METHOD_OR_PROPERTY(injection, methodOrProperty));
   }
 }
@@ -85,16 +101,28 @@ export function throwIsReadonly(key: string): void {
 * Utils
 * */
 
-export function applyPipes(selection: Observable<any>, options: DecoratorOptionInterface): Observable<any> {
+export function hasOwnProperty(object: any, key: string): boolean {
+  return typeof object[key] !== 'undefined';
+}
+
+export function isSelector(selector: Selector<any, any>) {
+  return selector.length === 0;
+}
+
+export function isFunction(functionToCheck: any): boolean {
+  return !!functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+}
+
+export function applyPipes(selection: Observable<any>, options: IDecoratorOptionsForSubscription): Observable<any> {
   selection = options.takeUntil ? selection.pipe(takeUntil(this[options.takeUntil])) : selection;
 
   return options.pipe.length ? selection.pipe(...(options.pipe as [OperatorFunction<any, any>])) : selection;
 }
 
-export function logValues(selection: Observable<any>, key: string, options: DecoratorOptionInterface) {
+export function logValues(selection: Observable<any>, key: string, options: IDecoratorOptionsForSubscription) {
   if (options.log) {
-    const subscription = selection.subscribe(value => {
-      console.log(`${key.toUpperCase()}:`);
+    const subscription = selection.subscribe((value: any) => {
+      console.log(`${key}:`);
       console.dir(value);
     });
 
@@ -104,12 +132,12 @@ export function logValues(selection: Observable<any>, key: string, options: Deco
   }
 }
 
-export function getObservable(target: any, injection: string, methodOrProperty: string): Observable<any> {
+export function getObservable(target: any, injection: string, methodOrProperty: string, args?: any[]): Observable<any> {
   if (isObservable(target)) {
     return target;
   } else {
     try {
-      return getObservable(target(), injection, methodOrProperty);
+      return getObservable(target(...args), injection, methodOrProperty);
     } catch (e) {
       throwIsNotAnObservable(injection, methodOrProperty);
     }
@@ -125,9 +153,13 @@ export function getObservableFromSelector(...arg): Observable<any> {
   return selection;
 }
 
-export function subscribeTo(selection: Observable<any>, privateKeyName: string, options: DecoratorOptionInterface) {
-  const subscription = selection.subscribe(data => {
-    this[privateKeyName] = data;
+export function subscribeTo(
+  selection: Observable<any>,
+  privateKeyName: string,
+  options: IDecoratorOptionsForSubscription
+) {
+  const subscription = selection.subscribe((value: any) => {
+    this[privateKeyName] = value;
   });
 
   if (options.subscriptionsCollector) {
@@ -135,6 +167,6 @@ export function subscribeTo(selection: Observable<any>, privateKeyName: string, 
   }
 }
 
-export function isSelector(selector: Selector<any, any>) {
-  return selector.length === 0;
+export function getArgumentsFromOptions<T extends IDecoratorOptionsForGet>(options: T): any[] {
+  return options && options.args ? options.args : [];
 }

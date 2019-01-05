@@ -11,7 +11,9 @@ also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract cla
 to create observables and handle subscriptions.
 
 ## Example
-1. Sample store facade service:
+
+### Sample store facade service:
+
   ```typescript
   @Injectable()
   export class CounterFacadeService extends StoreFacade {
@@ -66,7 +68,8 @@ to create observables and handle subscriptions.
   }
   ```
 
-2. Sample usage in component or service:
+### Sample usage in component or service:
+
   ```typescript
   @Component({
     selector: 'app-basic-usage',

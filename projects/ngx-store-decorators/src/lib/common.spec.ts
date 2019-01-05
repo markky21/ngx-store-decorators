@@ -4,7 +4,13 @@ import { delay, first } from 'rxjs/operators';
 import * as common from './common';
 
 describe('Validators', () => {
-  const toTest = [
+  const toTest: {
+    methodName: string;
+    method: any;
+    context: any;
+    arg: any[];
+    contain: string;
+  }[] = [
     {
       methodName: 'checkIfHasPropertyStore()',
       method: common.checkIfHasPropertyStore,
@@ -15,7 +21,7 @@ describe('Validators', () => {
     {
       methodName: 'checkIfHasPropertySubscriptions()',
       method: common.checkIfHasPropertySubscriptions,
-      context: { prototype: { constructor: { name: 'TEST' } } },
+      context: { constructor: { name: 'TEST' } },
       arg: [{}],
       contain: common.ERROR_MESSAGE_NO_SUBSCRIPTION_COLLECTOR('TEST')
     },
@@ -60,7 +66,7 @@ describe('Validators', () => {
 describe('Utils', () => {
   it('applyPipes() should apply pipes', () => {
     const result = common.applyPipes.call({ takeUntilSubject: new Subject() }, new Observable(), {
-      ...common.decoratorOptionDefaultValues,
+      ...common.decoratorOptionDefaultValuesForObservable,
       takeUntil: 'takeUntilSubject',
       pipe: [delay(0)]
     });
@@ -100,7 +106,7 @@ describe('Utils', () => {
     const context = {
       context: { store: { pipe: () => of(1) } },
       selector: () => {},
-      options: common.decoratorOptionDefaultValues,
+      options: common.decoratorOptionDefaultValuesForObservable,
       key: 'key'
     };
 
@@ -115,8 +121,8 @@ describe('Utils', () => {
   it('getObservableFromSelector() call selector factory with passed arguments', () => {
     const context = {
       context: { store: { pipe: () => of(1) } },
-      selector: (a) => {},
-      options: common.decoratorOptionDefaultValues,
+      selector: a => {},
+      options: common.decoratorOptionDefaultValuesForObservable,
       key: 'key'
     };
     const spy = spyOn(context, 'selector').and.callThrough();
@@ -135,5 +141,30 @@ describe('Utils', () => {
 
     expect(context.key).toEqual(1);
     expect(spySubscription).toHaveBeenCalledTimes(1);
+  });
+
+  it('isFunction() should return true if arg is a function', () => {
+    const toTest = [
+      { arg: () => {}, result: true },
+      { arg: 'a', result: false },
+      { arg: 0, result: false },
+      { arg: function() {}, result: true },
+      { arg: Observable, result: true },
+      { arg: new Observable(), result: false },
+      { arg: null, result: false },
+      { arg: undefined, result: false }
+    ];
+
+    toTest.forEach((test: any) => {
+      expect(common.isFunction(test.arg)).toEqual(test.result);
+    });
+  });
+
+  it('getArgumentsFromOptions() should return args property from decorator options', () => {
+    const toTest = [{ arg: [1], result: [1] }, { arg: undefined, result: [] }];
+
+    toTest.forEach((test: any) => {
+      expect(common.getArgumentsFromOptions({ args: test.arg })).toEqual(test.result);
+    });
   });
 });
