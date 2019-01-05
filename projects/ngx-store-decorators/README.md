@@ -3,12 +3,20 @@
 [![NPM](https://nodei.co/npm/ngx-store-decorators.png?downloads=true&stars=true)](https://nodei.co/npm/ngx-store-decorators/)
 
 NgxStoreDecorators is a set of useful decorators and classes for quickly create NgRx store facades, 
-creating observables and subscribing to them. 
+assigning values, observables or observables values to class properties.
 
-This package introduce `@StoreSelect()`, `@StoreSubscribe()`, `@StoreDispatch()` decorators 
+<br>This package introduce:
+ 
+`@StoreSelect()`, `@StoreSubscribe()`, `@StoreDispatch()` decorators 
 and `StoreFacade` abstract class for NgRx store maintaining,
-also `@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract class 
-to create observables and handle subscriptions.
+
+
+`@Select()`, `@Subscribe()` decorators and `WithSubscriptions` abstract class 
+to assign observables or observables values and handle subscriptions,
+
+also `@Get()` to assign values from injected classes method or properties. 
+
+<br>
 
 ## Example
 
@@ -68,6 +76,8 @@ to create observables and handle subscriptions.
   }
   ```
 
+<br>
+
 ### Sample usage in component or service:
 
   ```typescript
@@ -82,6 +92,12 @@ to create observables and handle subscriptions.
   
     @Subscribe('counterFacadeService', 'count$')
     public count: number;
+    
+    @Get('counterFacadeService', 'count')
+    public getCount: number;
+    
+    @Get('counterFacadeService', 'countFunction')
+    public getCountFunction: number;
   
     public constructor(public counterFacadeService: CounterFacadeService) {
       super();
@@ -106,6 +122,10 @@ without decorators and `WithSubscriptions` abstract class:
   
     public count: number;
     
+    public getCount: number;
+    
+    public getCountFunction: number;
+    
     public readonly subscriptions = new Subscription();
   
     public constructor(public counterFacadeService: CounterFacadeService) {}
@@ -117,6 +137,10 @@ without decorators and `WithSubscriptions` abstract class:
         this.counterFacadeService.count$
         .subscribe(value => this.count = value)
       )
+      
+      this.getCount = this.counterFacadeService.count;
+      
+      this.getCountFunction = this.counterFacadeService.countFunction();
     }
     
     public ngOnDestroy(): void {
@@ -129,29 +153,40 @@ without decorators and `WithSubscriptions` abstract class:
   }
 ```
 
+<br>
+
 ## Decorators configuration (optional)
 
 **`log`** - [**`?boolean`**]
 
 Default is set to **false**. Set to **true** if you want to console.log all new values from an observable.
+<br> _Optional for `@StoreSelect()`,  `@StoreSubscribe()`,  `@Select()`,  `@Subscribe()`_
 
-**`pipe`** - [**`?OperatorFunction<any, any>[]`**]
+<br>**`pipe`** - [**`?OperatorFunction<any, any>[]`**]
 
 Here you can pass some RxJs operators.
+<br> _Optional for `@StoreSelect()`,  `@StoreSubscribe()`,  `@Select()`,  `@Subscribe()`_
 
 
-**`subscriptionsCollector`** - [**`?string`**]
+<br>**`subscriptionsCollector`** - [**`?string`**]
 
-Needed only for `@StoreSubscribe()` and `@Subscribe` decorators. 
 Default is set to **subscriptions** witch should be an RxJs **Subscription** instance. 
 You can extend component or service with `StoreFacade` or `WithSubscriptions` abstract classes
 to automatically add this property to class.
+<br> _Optional for `@StoreSubscribe()`, `@Subscribe()`_
 
-**`takeUntil`** - [**`?string`**]
+<br>**`takeUntil`** - [**`?string`**]
 
-Optional needed only for `@StoreSubscribe()` and `@Subscribe` decorators. 
 You can handle subscriptions by **takeUntil** operator. 
-Here you just pass a name of the class property witch should be **Subject<boolean>** instance 
+Here you just pass a name of the class property witch should be **Subject<boolean>** instance.
+<br> _Optional for `@StoreSubscribe()`, `@Subscribe()`_
+
+<br>**`args`** - [**`?any[]`**]
+
+You can resolve injection method with given arguments.
+<br> _Optional for `@Select()`, `@Subscribe()`, `@get()`_
+
+<br>
 
 ## Demo
 
