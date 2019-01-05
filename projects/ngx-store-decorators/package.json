@@ -1,15 +1,18 @@
 {
   "name": "ngx-store-decorators",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "A set of useful decorators and classes to quickly create a facade between the application and the store.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/markky21/ngx-store-decorators.git"
   },
   "keywords": [
-    "TypeScript",
+    "Angular",
     "Decorators",
-    "NgRx"
+    "NgRx",
+    "Observable",
+    "RxJs",
+    "TypeScript"
   ],
   "author": "Marcin Mirecki <markky21@gmail.com>",
   "license": "MIT",

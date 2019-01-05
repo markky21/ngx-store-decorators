@@ -21,6 +21,9 @@ export class CounterFacadeService extends StoreFacade {
 
   @StoreSubscribe(selectors.getCount) public count: number;
 
+  public countFunction = () => this.count;
+  public countFunctionWithArg = (multiplyBy: number) => this.count * multiplyBy;
+
   public constructor(protected store: Store<State>) {
     super();
   }

@@ -1,13 +1,6 @@
 import { Selector } from '@ngrx/store';
-import {
-  checkIfHasPropertyStore,
-  checkIfHasPropertySubscriptions,
-  DecoratorOptionInterface,
-  decoratorStoreOptionDefaultValues,
-  getObservableFromSelector,
-  isSelector,
-  subscribeTo
-} from '../common';
+
+import * as fromCommon from '../common';
 
 /**
  * The decorator who pass Observable from injection method or property to decorated property
@@ -22,14 +15,17 @@ import {
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function StoreSelect(selector: Selector<any, any> | any, options?: DecoratorOptionInterface) {
+export function StoreSelect(
+  selector: Selector<any, any> | any,
+  options?: fromCommon.IDecoratorOptionsForStoreSelect
+) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
-        options = { ...decoratorStoreOptionDefaultValues, ...options };
-        checkIfHasPropertyStore.call(this);
+        options = { ...fromCommon.decoratorOptionDefaultValuesForObservable, ...options };
+        fromCommon.checkIfHasPropertyStore.call(this);
 
         const context = {
           context: this,
@@ -38,9 +34,9 @@ export function StoreSelect(selector: Selector<any, any> | any, options?: Decora
           options
         };
 
-        this[privateKeyName] = isSelector(selector)
-          ? getObservableFromSelector.call(context)
-          : getObservableFromSelector.bind(context);
+        this[privateKeyName] = fromCommon.isSelector(selector)
+          ? fromCommon.getObservableFromSelector.call(context)
+          : fromCommon.getObservableFromSelector.bind(context);
       }
 
       return this[privateKeyName];
@@ -55,7 +51,7 @@ export function StoreSelect(selector: Selector<any, any> | any, options?: Decora
         get: getter,
         set: setter,
         enumerable: true,
-        configurable: true
+        configurable: false
       });
     }
   };
@@ -74,15 +70,18 @@ export function StoreSelect(selector: Selector<any, any> | any, options?: Decora
  * public currency: CurrencyInterface;
  * ```
  */
-export function StoreSubscribe(selector: Selector<any, any>, options?: DecoratorOptionInterface) {
+export function StoreSubscribe(
+  selector: Selector<any, any>,
+  options?: fromCommon.IDecoratorOptionsForStoreSubscribe
+) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
-        options = { ...decoratorStoreOptionDefaultValues, ...options };
-        checkIfHasPropertyStore.call(this);
-        checkIfHasPropertySubscriptions.call(this, options);
+        options = { ...fromCommon.decoratorOptionDefaultValuesForSubscription, ...options };
+        fromCommon.checkIfHasPropertyStore.call(this);
+        fromCommon.checkIfHasPropertySubscriptions.call(this, options);
 
         const context = {
           context: this,
@@ -91,11 +90,11 @@ export function StoreSubscribe(selector: Selector<any, any>, options?: Decorator
           options
         };
 
-        let selection = isSelector(selector)
-          ? getObservableFromSelector.call(context)
-          : getObservableFromSelector.bind(context);
+        const selection = fromCommon.isSelector(selector)
+          ? fromCommon.getObservableFromSelector.call(context)
+          : fromCommon.getObservableFromSelector.bind(context);
 
-        subscribeTo.call(this, selection, privateKeyName, options);
+        fromCommon.subscribeTo.call(this, selection, privateKeyName, options);
       }
 
       return this[privateKeyName];
@@ -110,7 +109,7 @@ export function StoreSubscribe(selector: Selector<any, any>, options?: Decorator
         get: getter,
         set: setter,
         enumerable: true,
-        configurable: true
+        configurable: false
       });
     }
   };
@@ -131,7 +130,7 @@ export function StoreDispatch<T extends any>(Action: T) {
   return function(target: any, key: string, descriptor: PropertyDescriptor) {
     descriptor.writable = false;
     descriptor.value = function(payload: any = undefined) {
-      checkIfHasPropertyStore.call(this);
+      fromCommon.checkIfHasPropertyStore.call(this);
 
       this.store.dispatch(new Action(payload));
     };

@@ -32,7 +32,7 @@ import { OptionConfigurationsComponent } from './option-configurations/option-co
     MatButtonModule,
     MatSidenavModule,
     MatIconModule,
-    MatListModule,
+    MatListModule
   ],
   providers: [],
   bootstrap: [AppComponent]

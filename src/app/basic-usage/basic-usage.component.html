@@ -3,11 +3,43 @@
 <hr>
 
 <article>
-  <pre>public count$: {{ count$ | async }}</pre>
-  <pre>public count: {{ count }}</pre>
+  <h6>Decorator Select (for handle Observables):</h6>
+  <pre>
+@Select('counterFacadeService', 'count$')
+public count$: Observable{{'<'}}number>; => {{ count$ | async }} | async;
+  </pre>
+  <pre>
+@Select('counterFacadeService', 'countMultiplyBy$', {{'{'}}args: [3]})
+public countMultiplyBy$: Observable{{'<'}}number>; => {{ countMultiplyBy$ | async }} | async;
+  </pre>
+
+  <h6>Decorator Subscribe (for handle Observables):</h6>
+  <pre>
+@Subscribe('counterFacadeService', 'count$')
+public count: number; => {{ count }};
+  </pre>
+  <pre>
+@Subscribe('counterFacadeService', 'countMultiplyBy$', {{'{'}}args: [3]})
+public countMultiplyBy: number; => {{ countMultiplyBy }}
+  </pre>
+
+  <h6>Decorator Get (for handle any values):</h6>
+  <pre>
+@Get('counterFacadeService', 'count')
+public getCount: number; => {{ getCount }}
+  </pre>
+  <pre>
+@Get('counterFacadeService', 'countFunction')
+public getCountFunction: number; => {{ getCountFunction }}
+  </pre>
+  <pre>
+@Get('counterFacadeService', 'countFunctionWithArg', {{'{'}}args: [3]})
+public getCountFunctionWithArguments: number; => {{ getCountFunctionWithArguments }}
+  </pre>
+
+  <h6>Directly from service</h6>
   <pre>public counterFacadeService.count$: {{ counterFacadeService.count$ | async }}</pre>
   <pre>public counterFacadeService.count: {{ counterFacadeService.count }}</pre>
-  <pre>public countMultiplyBy$: {{ countMultiplyBy$ | async }}</pre>
 </article>
 
 <button
