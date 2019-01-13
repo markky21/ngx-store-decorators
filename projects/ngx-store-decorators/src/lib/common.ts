@@ -2,6 +2,8 @@ import { isObservable, Observable, OperatorFunction, Subscription } from 'rxjs';
 import { select, Selector, Store } from '@ngrx/store';
 import { takeUntil } from 'rxjs/operators';
 
+import { IDecoratorOptionsForGet } from './decorators/injectables-decorators';
+
 /*
 * Const
 * */
@@ -21,10 +23,6 @@ export const ERROR_MESSAGE_READONLY = (key: string) => `The "${key}" property is
 * Interfaces
 * */
 
-export interface IDecoratorOptionsForGet {
-  args?: any[];
-}
-
 export interface IDecoratorOptionsForObservable {
   log?: boolean;
   pipe?: Array<OperatorFunction<any, any>>;
@@ -34,18 +32,6 @@ export interface IDecoratorOptionsForSubscription extends IDecoratorOptionsForOb
   subscriptionsCollector?: string;
   takeUntil?: string;
 }
-
-/* tslint:disable-next-line:no-empty-interface */
-export interface IDecoratorOptionsSelect extends IDecoratorOptionsForGet, IDecoratorOptionsForObservable {}
-
-/* tslint:disable-next-line:no-empty-interface */
-export interface IDecoratorOptionsForSubscribe extends IDecoratorOptionsForGet, IDecoratorOptionsForSubscription {}
-
-/* tslint:disable-next-line:no-empty-interface */
-export interface IDecoratorOptionsForStoreSelect extends IDecoratorOptionsForObservable {}
-
-/* tslint:disable-next-line:no-empty-interface */
-export interface IDecoratorOptionsForStoreSubscribe extends IDecoratorOptionsForSubscription {}
 
 /*
 * Definitions

@@ -2,6 +2,16 @@ import { Selector } from '@ngrx/store';
 
 import * as fromCommon from '../common';
 
+/*
+* Interfaces
+* */
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsForStoreSelect extends fromCommon.IDecoratorOptionsForObservable {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsForStoreSubscribe extends fromCommon.IDecoratorOptionsForSubscription {}
+
 /**
  * The decorator who pass Observable from injection method or property to decorated property
  *
@@ -15,10 +25,7 @@ import * as fromCommon from '../common';
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function StoreSelect(
-  selector: Selector<any, any> | any,
-  options?: fromCommon.IDecoratorOptionsForStoreSelect
-) {
+export function StoreSelect(selector: Selector<any, any> | any, options?: IDecoratorOptionsForStoreSelect) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
@@ -70,10 +77,7 @@ export function StoreSelect(
  * public currency: CurrencyInterface;
  * ```
  */
-export function StoreSubscribe(
-  selector: Selector<any, any>,
-  options?: fromCommon.IDecoratorOptionsForStoreSubscribe
-) {
+export function StoreSubscribe(selector: Selector<any, any>, options?: IDecoratorOptionsForStoreSubscribe) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;

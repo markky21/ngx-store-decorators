@@ -2,6 +2,20 @@ import { Observable } from 'rxjs';
 
 import * as fromCommon from '../common';
 
+/*
+* Interfaces
+* */
+
+export interface IDecoratorOptionsForGet {
+  args?: any[];
+}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsSelect extends IDecoratorOptionsForGet, fromCommon.IDecoratorOptionsForObservable {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface IDecoratorOptionsForSubscribe extends IDecoratorOptionsForGet, fromCommon.IDecoratorOptionsForSubscription {}
+
 /**
  * The decorator who pass Observable from injection method or property to decorated property
  *
@@ -16,7 +30,7 @@ import * as fromCommon from '../common';
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function Select(injection: string, methodOrProperty: string, options?: fromCommon.IDecoratorOptionsSelect) {
+export function Select(injection: string, methodOrProperty: string, options?: IDecoratorOptionsSelect) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
@@ -71,11 +85,7 @@ export function Select(injection: string, methodOrProperty: string, options?: fr
  * public currency: CurrencyInterface;
  * ```
  */
-export function Subscribe(
-  injection: string,
-  methodOrProperty: string,
-  options?: fromCommon.IDecoratorOptionsForSubscribe
-) {
+export function Subscribe(injection: string, methodOrProperty: string, options?: IDecoratorOptionsForSubscribe) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
@@ -131,7 +141,7 @@ export function Subscribe(
  * public currency: CurrencyInterface;
  * ```
  */
-export function Get(injection: string, methodOrProperty: string, options?: fromCommon.IDecoratorOptionsForGet) {
+export function Get(injection: string, methodOrProperty: string, options?: IDecoratorOptionsForGet) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
