@@ -1,8 +1,34 @@
 import { isObservable, Observable, OperatorFunction, Subscription } from 'rxjs';
-import { select, Selector, Store } from '@ngrx/store';
+import { Action, select, Selector, Store } from '@ngrx/store';
 import { takeUntil } from 'rxjs/operators';
 
-import { IDecoratorOptionsForGet } from './decorators/injectables-decorators';
+import { GetOptions } from './decorators/injectables-decorators';
+
+/*
+* Interfaces
+* */
+
+export interface IDispatcher<T extends Action> {
+  new (...args: any[]): T;
+}
+
+export interface IDecoratorOptionsForObservable {
+  log?: boolean;
+  pipe?: Array<OperatorFunction<any, any>>;
+}
+
+export interface IDecoratorOptionsForSubscription extends IDecoratorOptionsForObservable {
+  subscriptionsCollector?: string;
+  takeUntil?: string;
+}
+
+/*
+* Types
+* */
+
+export type Selector<T, V> = (state: T) => V;
+export type SelectorFactory<T, V, Y> = (arg: T) => (state: V) => Y;
+export type ExtendedSelector<T, V, Y> = Selector<T, V> | SelectorFactory<T, V, Y>;
 
 /*
 * Const
@@ -18,20 +44,6 @@ export const ERROR_MESSAGE_NO_METHOD_OR_PROPERTY = (injection: string, methodOrP
 export const ERROR_MESSAGE_NOT_AN_OBSERVABLE = (injection: string, methodOrProperty: string) =>
   `The ${methodOrProperty} property of ${injection} instance is not a Observable or is not a method returning Observable`;
 export const ERROR_MESSAGE_READONLY = (key: string) => `The "${key}" property is readonly`;
-
-/*
-* Interfaces
-* */
-
-export interface IDecoratorOptionsForObservable {
-  log?: boolean;
-  pipe?: Array<OperatorFunction<any, any>>;
-}
-
-export interface IDecoratorOptionsForSubscription extends IDecoratorOptionsForObservable {
-  subscriptionsCollector?: string;
-  takeUntil?: string;
-}
 
 /*
 * Definitions
@@ -153,6 +165,6 @@ export function subscribeTo(
   }
 }
 
-export function getArgumentsFromOptions<T extends IDecoratorOptionsForGet>(options: T): any[] {
+export function getArgumentsFromOptions<T extends GetOptions>(options: T): any[] {
   return options && options.args ? options.args : [];
 }

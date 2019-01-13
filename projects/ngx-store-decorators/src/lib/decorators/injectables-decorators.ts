@@ -6,15 +6,15 @@ import * as fromCommon from '../common';
 * Interfaces
 * */
 
-export interface IDecoratorOptionsForGet {
+export interface GetOptions {
   args?: any[];
 }
 
 /* tslint:disable-next-line:no-empty-interface */
-export interface IDecoratorOptionsSelect extends IDecoratorOptionsForGet, fromCommon.IDecoratorOptionsForObservable {}
+export interface SelectOptions extends GetOptions, fromCommon.IDecoratorOptionsForObservable {}
 
 /* tslint:disable-next-line:no-empty-interface */
-export interface IDecoratorOptionsForSubscribe extends IDecoratorOptionsForGet, fromCommon.IDecoratorOptionsForSubscription {}
+export interface SubscribeOptions extends GetOptions, fromCommon.IDecoratorOptionsForSubscription {}
 
 /**
  * The decorator who pass Observable from injection method or property to decorated property
@@ -30,9 +30,9 @@ export interface IDecoratorOptionsForSubscribe extends IDecoratorOptionsForGet, 
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function Select(injection: string, methodOrProperty: string, options?: IDecoratorOptionsSelect) {
+export function Select<T>(injection: string, methodOrProperty: string, options?: SelectOptions) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
@@ -56,9 +56,7 @@ export function Select(injection: string, methodOrProperty: string, options?: ID
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      fromCommon.throwIsReadonly(key);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
@@ -85,9 +83,9 @@ export function Select(injection: string, methodOrProperty: string, options?: ID
  * public currency: CurrencyInterface;
  * ```
  */
-export function Subscribe(injection: string, methodOrProperty: string, options?: IDecoratorOptionsForSubscribe) {
+export function Subscribe<T>(injection: string, methodOrProperty: string, options?: SubscribeOptions) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
@@ -112,9 +110,7 @@ export function Subscribe(injection: string, methodOrProperty: string, options?:
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      fromCommon.throwIsReadonly(key);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
@@ -141,9 +137,9 @@ export function Subscribe(injection: string, methodOrProperty: string, options?:
  * public currency: CurrencyInterface;
  * ```
  */
-export function Get(injection: string, methodOrProperty: string, options?: IDecoratorOptionsForGet) {
+export function Get<T>(injection: string, methodOrProperty: string, options?: GetOptions) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
@@ -163,9 +159,7 @@ export function Get(injection: string, methodOrProperty: string, options?: IDeco
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      fromCommon.throwIsReadonly(key);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
