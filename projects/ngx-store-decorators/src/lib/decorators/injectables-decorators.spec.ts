@@ -3,6 +3,7 @@ import { of, Subscription, Observable } from 'rxjs';
 
 import { Get, Select, Subscribe } from './injectables-decorators';
 
+let SampleServieConstructor;
 let SampleClass;
 let SampleClassWithoutSubscriptions;
 let sampleClassInstance;
@@ -26,6 +27,8 @@ beforeEach(() => {
     }
   }
 
+  SampleServieConstructor = SampleService;
+
   SampleClass = class {
     public sampleProperty: any = null;
     public sampleProperty$: any;
@@ -45,7 +48,7 @@ beforeEach(() => {
 
 describe('Decorator Select', () => {
   it('should return observable from service when property was read', () => {
-    const decoratorFn = Select('sampleService', 'observableInProperty');
+    const decoratorFn = Select(SampleServieConstructor, 'observableInProperty');
     decoratorFn(sampleClassInstance, 'sampleProperty$');
 
     const values$ = sampleClassInstance.sampleProperty$;
@@ -54,7 +57,7 @@ describe('Decorator Select', () => {
   });
 
   it('should return observable from service when method was call', () => {
-    const decoratorFn = Select('sampleService', 'observableInMethod');
+    const decoratorFn = Select(SampleServieConstructor, 'observableInMethod');
     decoratorFn(sampleClassInstance, 'sampleProperty$');
 
     const values$ = sampleClassInstance.sampleProperty$;
@@ -62,23 +65,9 @@ describe('Decorator Select', () => {
     values$.pipe(first()).subscribe(val => expect(val).toEqual(21));
   });
 
-  it('should return throw an error when injection does not exist', () => {
-    const decoratorFn = Select('sampleService2', 'observableInMethod');
-    decoratorFn(sampleClassInstance, 'sampleProperty$');
-    let error;
-
-    try {
-      decoratorFn(sampleClassInstance, 'sampleProperty$');
-      const values$ = sampleClassInstance.sampleProperty$;
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).toBeTruthy();
-  });
 
   it('should return throw an error when method or property on injection does not exist', () => {
-    const decoratorFn = Select('sampleService', 'observableInMethod2');
+    const decoratorFn = Select(SampleServieConstructor, 'observableInMethod2');
     let error;
 
     try {
@@ -92,7 +81,7 @@ describe('Decorator Select', () => {
   });
 
   it('should trow an error when user try to set value to decorated property', () => {
-    const decoratorFn = Select('sampleService', 'observableInProperty');
+    const decoratorFn = Select(SampleServieConstructor, 'observableInProperty');
 
     let error;
     try {
@@ -108,7 +97,7 @@ describe('Decorator Select', () => {
 
 describe('Decorator Subscribe', () => {
   it('should subscribe and return value from service when property was read', () => {
-    const decoratorFn = Subscribe('sampleService', 'observableInProperty');
+    const decoratorFn = Subscribe(SampleServieConstructor, 'observableInProperty');
 
     decoratorFn(sampleClassInstance, 'sampleProperty$');
 
@@ -118,7 +107,7 @@ describe('Decorator Subscribe', () => {
   });
 
   it('should subscribe and return observable from service when method was call', () => {
-    const decoratorFn = Subscribe('sampleService', 'observableInMethod');
+    const decoratorFn = Subscribe(SampleServieConstructor, 'observableInMethod');
     decoratorFn(sampleClassInstance, 'sampleProperty$');
 
     const values = sampleClassInstance.sampleProperty$;
@@ -126,24 +115,8 @@ describe('Decorator Subscribe', () => {
     expect(values).toEqual(21);
   });
 
-  it('should throw an error when injection does not exist', () => {
-    const decoratorFn = Subscribe('sampleService2', 'observableInMethod');
-    decoratorFn(sampleClassInstance, 'sampleProperty$');
-
-    let error;
-
-    try {
-      decoratorFn(sampleClassInstance, 'sampleProperty$');
-      const values$ = sampleClassInstance.sampleProperty$;
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).toBeTruthy();
-  });
-
   it('should throw an error when method or property on injection does not exist', () => {
-    const decoratorFn = Subscribe('sampleService', 'observableInMethod2');
+    const decoratorFn = Subscribe(SampleServieConstructor, 'observableInMethod2');
     let error;
 
     try {
@@ -157,7 +130,7 @@ describe('Decorator Subscribe', () => {
   });
 
   it('should return throw an subscriptions property does not exist', () => {
-    const decoratorFn = Subscribe('sampleService', 'observableInMethod');
+    const decoratorFn = Subscribe(SampleServieConstructor, 'observableInMethod');
     let error;
 
     try {
@@ -170,24 +143,8 @@ describe('Decorator Subscribe', () => {
     expect(error).toBeTruthy();
   });
 
-  it('should return throw an error when subscriptions property does not exist', () => {
-    const decoratorFn = Subscribe('sampleService', 'observableInMethod', {
-      subscriptionsCollector: 'wrongPropertyName'
-    });
-    let error;
-
-    try {
-      decoratorFn(sampleClassInstance, 'sampleProperty$');
-      const values$ = sampleClassInstance.sampleProperty$;
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).toBeTruthy();
-  });
-
   it('should return throw an error when property or method does not return Observable', () => {
-    const decoratorFn = Subscribe('sampleService', 'methodNotReturnObservable');
+    const decoratorFn = Subscribe(SampleServieConstructor, 'methodNotReturnObservable');
     let error;
 
     try {
@@ -201,7 +158,7 @@ describe('Decorator Subscribe', () => {
   });
 
   it('should trow an error when user try to set value to decorated property', () => {
-    const decoratorFn = Subscribe('sampleService', 'observableInProperty');
+    const decoratorFn = Subscribe(SampleServieConstructor, 'observableInProperty');
 
     let error;
     try {
@@ -217,7 +174,7 @@ describe('Decorator Subscribe', () => {
 
 describe('Decorator Get', () => {
   it('should get the value from injected class property', () => {
-    const decoratorFn = Get('sampleService', 'sampleProperty');
+    const decoratorFn = Get(SampleServieConstructor, 'sampleProperty');
 
     decoratorFn(sampleClassInstance, 'sampleProperty');
     const values$ = sampleClassInstance.sampleProperty;
@@ -226,7 +183,7 @@ describe('Decorator Get', () => {
   });
 
   it('should get the value from injected class method', () => {
-    const decoratorFn = Get('sampleService', 'sampleMethod');
+    const decoratorFn = Get(SampleServieConstructor, 'sampleMethod');
 
     decoratorFn(sampleClassInstance, 'sampleProperty');
     const values$ = sampleClassInstance.sampleProperty;
@@ -234,38 +191,8 @@ describe('Decorator Get', () => {
     expect(values$).toEqual(2);
   });
 
-  it('should throw an error when injection does not exist', () => {
-    const decoratorFn = Get('sampleService2', 'sampleMethod');
-    decoratorFn(sampleClassInstance, 'sampleProperty');
-
-    let error;
-
-    try {
-      decoratorFn(sampleClassInstance, 'sampleProperty');
-      const values$ = sampleClassInstance.sampleProperty;
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).toBeTruthy();
-  });
-
-  it('should throw an error when method or property on injection does not exist', () => {
-    const decoratorFn = Get('sampleService', 'sampleMethod2');
-    let error;
-
-    try {
-      decoratorFn(sampleClassInstance, 'sampleProperty');
-      const values$ = sampleClassInstance.sampleProperty;
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).toBeTruthy();
-  });
-
   it('should trow an error when user try to set value to decorated property', () => {
-    const decoratorFn = Get('sampleService', 'sampleMethod');
+    const decoratorFn = Get(SampleServieConstructor, 'sampleMethod');
 
     let error;
     try {

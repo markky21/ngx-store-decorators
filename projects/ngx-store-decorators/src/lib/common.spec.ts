@@ -2,6 +2,12 @@ import { isObservable, Observable, of, Subject, Subscription } from 'rxjs';
 import { delay, first } from 'rxjs/operators';
 
 import * as common from './common';
+import { ERROR_MESSAGE_NO_INSTANCE_FOUND } from './common';
+
+class SampleClass {
+  public sampleProperty: string;
+  public sampleMethod(): void {}
+}
 
 describe('Validators', () => {
   const toTest: {
@@ -26,25 +32,18 @@ describe('Validators', () => {
       contain: common.ERROR_MESSAGE_NO_SUBSCRIPTION_COLLECTOR('TEST')
     },
     {
-      methodName: 'checkIfHasInjection()',
-      method: common.checkIfHasInjection,
-      context: {},
-      arg: ['TEST'],
-      contain: common.ERROR_MESSAGE_NO_INJECTION_INSTANCE('TEST')
-    },
-    {
-      methodName: 'checkIfInjectionHasMethodOrProperty()',
-      method: common.checkIfInjectionHasMethodOrProperty,
-      context: { TEST: 'TEST' },
-      arg: ['TEST', 'TEST'],
-      contain: common.ERROR_MESSAGE_NO_METHOD_OR_PROPERTY('TEST', 'TEST')
-    },
-    {
       methodName: 'throwIsReadonly()',
       method: common.throwIsReadonly,
       context: {},
       arg: ['TEST'],
       contain: common.ERROR_MESSAGE_READONLY('TEST')
+    },
+    {
+      methodName: 'throwNoInstance()',
+      method: common.throwNoInstance,
+      context: { constructor: { name: 'TEST' } },
+      arg: ['TEST'],
+      contain: common.ERROR_MESSAGE_NO_INSTANCE_FOUND('TEST', 'TEST')
     }
   ];
 
@@ -166,5 +165,21 @@ describe('Utils', () => {
     toTest.forEach((test: any) => {
       expect(common.getArgumentsFromOptions({ args: test.arg })).toEqual(test.result);
     });
+  });
+
+  it('findClassInstancePropertyName() should return name of property witch has searched injection class instance', () => {
+    expect(common.findClassInstancePropertyName.call({ instance: new SampleClass() }, SampleClass)).toEqual('instance');
+  });
+
+  it('findClassInstancePropertyName() should throw an error when property with passed class instance does not exist', () => {
+    let errorMessage: Error;
+
+    try {
+      common.findClassInstancePropertyName.call({ constructor: { name: 'TEST' } }, SampleClass);
+    } catch (e) {
+      errorMessage = e.message;
+    }
+
+    expect(errorMessage).toContain(common.ERROR_MESSAGE_NO_INSTANCE_FOUND('TEST', 'SampleClass'));
   });
 });

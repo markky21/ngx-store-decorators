@@ -1,6 +1,17 @@
-import { Selector } from '@ngrx/store';
+import { Action } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
 import * as fromCommon from '../common';
+
+/*
+* Interfaces
+* */
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface StoreSelectOptions extends fromCommon.IDecoratorOptionsForObservable {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface StoreSubscribeOptions extends fromCommon.IDecoratorOptionsForSubscription {}
 
 /**
  * The decorator who pass Observable from injection method or property to decorated property
@@ -15,12 +26,9 @@ import * as fromCommon from '../common';
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function StoreSelect(
-  selector: Selector<any, any> | any,
-  options?: fromCommon.IDecoratorOptionsForStoreSelect
-) {
+export function StoreSelect<T, V, Y>(selector: fromCommon.ExtendedSelector<T, V, Y>, options?: StoreSelectOptions) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): Observable<V> {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
@@ -42,9 +50,7 @@ export function StoreSelect(
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      throw new Error(`The "${key}" property is readonly`);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
@@ -70,12 +76,12 @@ export function StoreSelect(
  * public currency: CurrencyInterface;
  * ```
  */
-export function StoreSubscribe(
-  selector: Selector<any, any>,
-  options?: fromCommon.IDecoratorOptionsForStoreSubscribe
+export function StoreSubscribe<T, V, Y>(
+  selector: fromCommon.ExtendedSelector<T, V, Y>,
+  options?: StoreSubscribeOptions
 ) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): V {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
@@ -100,9 +106,7 @@ export function StoreSubscribe(
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      throw new Error(`The "${key}" property is readonly`);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
@@ -118,7 +122,7 @@ export function StoreSubscribe(
 /**
  * The decorator who dispatch payload to store
  *
- * @param Action - store action
+ * @param action - store action
  *
  * Sample usage:
  * ```
@@ -126,13 +130,13 @@ export function StoreSubscribe(
  * public clearInvoice(invoiceId: number): void {}
  * ```
  */
-export function StoreDispatch<T extends any>(Action: T) {
-  return function(target: any, key: string, descriptor: PropertyDescriptor) {
+export function StoreDispatch<T extends Action>(action: fromCommon.IDispatcher<T>) {
+  return function(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     descriptor.writable = false;
-    descriptor.value = function(payload: any = undefined) {
+    descriptor.value = function(...payload) {
       fromCommon.checkIfHasPropertyStore.call(this);
 
-      this.store.dispatch(new Action(payload));
+      this.store.dispatch(new action(...payload));
     };
     return descriptor;
   };

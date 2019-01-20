@@ -160,7 +160,6 @@ describe('Decorator StoreSubscribe', () => {
     expect(error).toBeTruthy();
   });
 
-
   it('should return throw an error when subscriptions property does not exist', () => {
     const observable = of(21);
     spyOn<any>(storeInstance, 'pipe').and.returnValue(observable);
@@ -200,7 +199,11 @@ describe('Decorator StoreDispatch', () => {
   it('should throw an error when store property does not exist', () => {
     let error;
 
-    const descriptor = StoreDispatch(class {})(
+    const descriptor = StoreDispatch(
+      class {
+        public type: '';
+      }
+    )(
       SampleClassWithoutStore.prototype,
       'sampleMethod',
       Object.getOwnPropertyDescriptor(SampleClassWithoutStore.prototype, 'sampleMethod')
@@ -219,11 +222,11 @@ describe('Decorator StoreDispatch', () => {
   it('should dispatch to the store when method has been called', () => {
     const spy = spyOn<any>(storeInstance, 'dispatch').and.returnValue(null);
 
-    const descriptor = StoreDispatch(class {})(
-      SampleClass.prototype,
-      'sampleMethod',
-      Object.getOwnPropertyDescriptor(SampleClass.prototype, 'sampleMethod')
-    );
+    const descriptor = StoreDispatch(
+      class {
+        public type: '';
+      }
+    )(SampleClass.prototype, 'sampleMethod', Object.getOwnPropertyDescriptor(SampleClass.prototype, 'sampleMethod'));
     Object.defineProperty(SampleClass.prototype, 'sampleMethod', descriptor);
 
     new SampleClass(storeInstance).sampleMethod();

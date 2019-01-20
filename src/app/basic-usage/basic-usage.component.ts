@@ -1,7 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Get, Select, Subscribe } from '../../../projects/ngx-store-decorators/src/lib/decorators/injectables-decorators';
+import {
+  Get,
+  Select,
+  Subscribe
+} from '../../../projects/ngx-store-decorators/src/lib/decorators/injectables-decorators';
 import { CounterFacadeService } from '../store/facades/counter.facade.service';
 import { WithSubscriptions } from '../../../projects/ngx-store-decorators/src/lib/classes/with-subscriptions.class';
 
@@ -11,29 +15,28 @@ import { WithSubscriptions } from '../../../projects/ngx-store-decorators/src/li
   styleUrls: ['./basic-usage.component.scss']
 })
 export class BasicUsageComponent extends WithSubscriptions implements OnDestroy {
-
   // Decorator Select
-  @Select('counterFacadeService', 'count$')
+  @Select(CounterFacadeService, 'count$')
   public count$: Observable<number>;
 
-  @Select('counterFacadeService', 'countMultiplyBy$', {args: [3]})
+  @Select(CounterFacadeService, 'countMultiplyBy$', { args: [3] })
   public countMultiplyBy$: Observable<number>;
 
   // Decorator Subscribe
-  @Subscribe('counterFacadeService', 'count$')
+  @Subscribe(CounterFacadeService, 'count$')
   public count: number;
 
-  @Subscribe('counterFacadeService', 'countMultiplyBy$', {args: [3]})
+  @Subscribe(CounterFacadeService, 'countMultiplyBy$', { args: [3] })
   public countMultiplyBy: number;
 
   // Decorator Get
-  @Get('counterFacadeService', 'count')
+  @Get(CounterFacadeService, 'count')
   public getCount: number;
 
-  @Get('counterFacadeService', 'countFunction')
+  @Get(CounterFacadeService, 'countFunction')
   public getCountFunction: number;
 
-  @Get('counterFacadeService', 'countFunctionWithArg', {args: [3]})
+  @Get(CounterFacadeService, 'countFunctionWithArg', { args: [3] })
   public getCountFunctionWithArguments: number;
 
   public constructor(public counterFacadeService: CounterFacadeService) {

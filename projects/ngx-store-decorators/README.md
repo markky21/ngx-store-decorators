@@ -87,16 +87,16 @@ also `@Get()` to assign values from injected classes method or properties.
     styleUrls: ['./basic-usage.component.scss']
   })
   export class BasicUsageComponent extends WithSubscriptions implements OnDestroy {
-    @Select('counterFacadeService', 'count$')
+    @Select(CounterFacadeService, 'count$')
     public count$: Observable<number>;
   
-    @Subscribe('counterFacadeService', 'count$')
+    @Subscribe(CounterFacadeService, 'count$')
     public count: number;
     
-    @Get('counterFacadeService', 'count')
+    @Get(CounterFacadeService, 'count')
     public getCount: number;
     
-    @Get('counterFacadeService', 'countFunction')
+    @Get(CounterFacadeService, 'countFunction')
     public getCountFunction: number;
   
     public constructor(public counterFacadeService: CounterFacadeService) {

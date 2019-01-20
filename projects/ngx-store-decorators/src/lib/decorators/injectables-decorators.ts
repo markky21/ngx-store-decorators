@@ -2,10 +2,24 @@ import { Observable } from 'rxjs';
 
 import * as fromCommon from '../common';
 
+/*
+* Interfaces
+* */
+
+export interface GetOptions {
+  args?: any[];
+}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface SelectOptions extends GetOptions, fromCommon.IDecoratorOptionsForObservable {}
+
+/* tslint:disable-next-line:no-empty-interface */
+export interface SubscribeOptions extends GetOptions, fromCommon.IDecoratorOptionsForSubscription {}
+
 /**
  * The decorator who pass Observable from injection method or property to decorated property
  *
- * @param injection - injection name
+ * @param injection - constructor of injection
  * @param methodOrProperty - method or property name
  * @param options - options
  * @return Observable
@@ -16,21 +30,25 @@ import * as fromCommon from '../common';
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function Select(injection: string, methodOrProperty: string, options?: fromCommon.IDecoratorOptionsSelect) {
+export function Select<T extends Function, K extends keyof T['prototype']>(
+  injection: T,
+  methodOrProperty: K,
+  options?: SelectOptions
+) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
         options = { ...fromCommon.decoratorOptionDefaultValuesForObservable, ...options };
-        fromCommon.checkIfHasInjection.call(this, injection);
-        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+
+        const classInstance = fromCommon.findClassInstancePropertyName.call(this, injection);
 
         let selection: Observable<any>;
         selection = fromCommon.getObservable(
-          this[injection][methodOrProperty],
-          injection,
-          methodOrProperty,
+          this[classInstance][methodOrProperty],
+          injection.constructor.name,
+          methodOrProperty.toString(),
           fromCommon.getArgumentsFromOptions(options)
         );
         selection = fromCommon.applyPipes.call(this, selection, options);
@@ -42,9 +60,7 @@ export function Select(injection: string, methodOrProperty: string, options?: fr
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      fromCommon.throwIsReadonly(key);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
@@ -60,7 +76,7 @@ export function Select(injection: string, methodOrProperty: string, options?: fr
 /**
  * The decorator who subscribes to the observable and submits the subscription to "subscriptions" collector
  *
- * @param injection - injection name
+ * @param injection - constructor of injection
  * @param methodOrProperty - method or property name
  * @param options - options
  * @return values from subscription
@@ -71,26 +87,26 @@ export function Select(injection: string, methodOrProperty: string, options?: fr
  * public currency: CurrencyInterface;
  * ```
  */
-export function Subscribe(
-  injection: string,
-  methodOrProperty: string,
-  options?: fromCommon.IDecoratorOptionsForSubscribe
+export function Subscribe<T extends Function, K extends keyof T['prototype']>(
+  injection: T,
+  methodOrProperty: K,
+  options?: SubscribeOptions
 ) {
   return function(target, key) {
-    const getter = function() {
+    const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
         options = { ...fromCommon.decoratorOptionDefaultValuesForSubscription, ...options };
-        fromCommon.checkIfHasInjection.call(this, injection);
-        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
         fromCommon.checkIfHasPropertySubscriptions.call(this, options);
+
+        const classInstance = fromCommon.findClassInstancePropertyName.call(this, injection);
 
         let selection: Observable<any>;
         selection = fromCommon.getObservable(
-          this[injection][methodOrProperty],
-          injection,
-          methodOrProperty,
+          this[classInstance][methodOrProperty],
+          injection.constructor.name,
+          methodOrProperty.toString(),
           fromCommon.getArgumentsFromOptions(options)
         );
         selection = fromCommon.applyPipes.call(this, selection, options);
@@ -102,9 +118,7 @@ export function Subscribe(
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      fromCommon.throwIsReadonly(key);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
@@ -120,7 +134,7 @@ export function Subscribe(
 /**
  * The decorator who get the value from injected class method or property
  *
- * @param injection - injection name
+ * @param injection - constructor of injection
  * @param methodOrProperty - method or property name
  * @param options - options
  * @return values from return
@@ -131,19 +145,22 @@ export function Subscribe(
  * public currency: CurrencyInterface;
  * ```
  */
-export function Get(injection: string, methodOrProperty: string, options?: fromCommon.IDecoratorOptionsForGet) {
+export function Get<T extends Function, K extends keyof T['prototype']>(
+  injection: T,
+  methodOrProperty: K,
+  options?: GetOptions
+) {
   return function(target, key) {
     const getter = function() {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
-        fromCommon.checkIfHasInjection.call(this, injection);
-        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+        const classInstance = fromCommon.findClassInstancePropertyName.call(this, injection);
 
         Object.defineProperty(this, privateKeyName, {
-          get: fromCommon.isFunction(this[injection][methodOrProperty])
-            ? () => this[injection][methodOrProperty](...fromCommon.getArgumentsFromOptions(options))
-            : () => this[injection][methodOrProperty],
+          get: fromCommon.isFunction(this[classInstance][methodOrProperty])
+            ? () => this[classInstance][methodOrProperty](...fromCommon.getArgumentsFromOptions(options))
+            : () => this[classInstance][methodOrProperty],
           set: undefined,
           enumerable: false,
           configurable: false
@@ -153,9 +170,7 @@ export function Get(injection: string, methodOrProperty: string, options?: fromC
       return this[privateKeyName];
     };
 
-    const setter = function() {
-      fromCommon.throwIsReadonly(key);
-    };
+    const setter = fromCommon.throwIsReadonly.bind(this, key);
 
     if (delete target[key]) {
       Object.defineProperty(target, key, {
