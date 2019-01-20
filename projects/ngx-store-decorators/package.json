@@ -1,7 +1,7 @@
 {
   "name": "ngx-store-decorators",
-  "version": "1.4.0",
-  "description": "A set of useful decorators and classes to quickly create a facade between the application and the store.",
+  "version": "1.5.0",
+  "description": "A set of useful decorators for Angular application. It helps to quickly get values from services, get Observables and subscribe to them. Also provides decorators to quickly create a facade between the application and the store.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/markky21/ngx-store-decorators.git"

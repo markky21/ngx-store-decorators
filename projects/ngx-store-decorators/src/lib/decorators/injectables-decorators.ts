@@ -19,7 +19,7 @@ export interface SubscribeOptions extends GetOptions, fromCommon.IDecoratorOptio
 /**
  * The decorator who pass Observable from injection method or property to decorated property
  *
- * @param injection - injection name
+ * @param injection - constructor of injection
  * @param methodOrProperty - method or property name
  * @param options - options
  * @return Observable
@@ -30,21 +30,25 @@ export interface SubscribeOptions extends GetOptions, fromCommon.IDecoratorOptio
  * public currency$: Observable<CurrencyInterface>;
  * ```
  */
-export function Select<T>(injection: string, methodOrProperty: string, options?: SelectOptions) {
+export function Select<T extends Function, K extends keyof T['prototype']>(
+  injection: T,
+  methodOrProperty: K,
+  options?: SelectOptions
+) {
   return function(target, key) {
     const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
         options = { ...fromCommon.decoratorOptionDefaultValuesForObservable, ...options };
-        fromCommon.checkIfHasInjection.call(this, injection);
-        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+
+        const classInstance = fromCommon.findClassInstancePropertyName.call(this, injection);
 
         let selection: Observable<any>;
         selection = fromCommon.getObservable(
-          this[injection][methodOrProperty],
-          injection,
-          methodOrProperty,
+          this[classInstance][methodOrProperty],
+          injection.constructor.name,
+          methodOrProperty.toString(),
           fromCommon.getArgumentsFromOptions(options)
         );
         selection = fromCommon.applyPipes.call(this, selection, options);
@@ -72,7 +76,7 @@ export function Select<T>(injection: string, methodOrProperty: string, options?:
 /**
  * The decorator who subscribes to the observable and submits the subscription to "subscriptions" collector
  *
- * @param injection - injection name
+ * @param injection - constructor of injection
  * @param methodOrProperty - method or property name
  * @param options - options
  * @return values from subscription
@@ -83,22 +87,26 @@ export function Select<T>(injection: string, methodOrProperty: string, options?:
  * public currency: CurrencyInterface;
  * ```
  */
-export function Subscribe<T>(injection: string, methodOrProperty: string, options?: SubscribeOptions) {
+export function Subscribe<T extends Function, K extends keyof T['prototype']>(
+  injection: T,
+  methodOrProperty: K,
+  options?: SubscribeOptions
+) {
   return function(target, key) {
     const getter = function(): T {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
         options = { ...fromCommon.decoratorOptionDefaultValuesForSubscription, ...options };
-        fromCommon.checkIfHasInjection.call(this, injection);
-        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
         fromCommon.checkIfHasPropertySubscriptions.call(this, options);
+
+        const classInstance = fromCommon.findClassInstancePropertyName.call(this, injection);
 
         let selection: Observable<any>;
         selection = fromCommon.getObservable(
-          this[injection][methodOrProperty],
-          injection,
-          methodOrProperty,
+          this[classInstance][methodOrProperty],
+          injection.constructor.name,
+          methodOrProperty.toString(),
           fromCommon.getArgumentsFromOptions(options)
         );
         selection = fromCommon.applyPipes.call(this, selection, options);
@@ -126,7 +134,7 @@ export function Subscribe<T>(injection: string, methodOrProperty: string, option
 /**
  * The decorator who get the value from injected class method or property
  *
- * @param injection - injection name
+ * @param injection - constructor of injection
  * @param methodOrProperty - method or property name
  * @param options - options
  * @return values from return
@@ -137,19 +145,22 @@ export function Subscribe<T>(injection: string, methodOrProperty: string, option
  * public currency: CurrencyInterface;
  * ```
  */
-export function Get<T>(injection: string, methodOrProperty: string, options?: GetOptions) {
+export function Get<T extends Function, K extends keyof T['prototype']>(
+  injection: T,
+  methodOrProperty: K,
+  options?: GetOptions
+) {
   return function(target, key) {
-    const getter = function(): T {
+    const getter = function() {
       const privateKeyName = '_' + key;
 
       if (!this.hasOwnProperty(privateKeyName)) {
-        fromCommon.checkIfHasInjection.call(this, injection);
-        fromCommon.checkIfInjectionHasMethodOrProperty.call(this, injection, methodOrProperty);
+        const classInstance = fromCommon.findClassInstancePropertyName.call(this, injection);
 
         Object.defineProperty(this, privateKeyName, {
-          get: fromCommon.isFunction(this[injection][methodOrProperty])
-            ? () => this[injection][methodOrProperty](...fromCommon.getArgumentsFromOptions(options))
-            : () => this[injection][methodOrProperty],
+          get: fromCommon.isFunction(this[classInstance][methodOrProperty])
+            ? () => this[classInstance][methodOrProperty](...fromCommon.getArgumentsFromOptions(options))
+            : () => this[classInstance][methodOrProperty],
           set: undefined,
           enumerable: false,
           configurable: false

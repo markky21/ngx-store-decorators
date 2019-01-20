@@ -6,7 +6,7 @@
   <p>You can log changes in the stream, even without having to subscribe</p>
 
   <pre>
-@Select('appSampleService', 'observableWithLog$', {{'{'}}log: true})
+@Select(AppSampleService, 'observableWithLog$', {{'{'}}log: true})
 public observableWithLog$: Observable{{'<'}}boolean>;
   </pre>
 
@@ -25,7 +25,7 @@ public observableWithLog$: Observable{{'<'}}boolean>;
   <p>You can add RxJs operators to the pipe (e.g.: delay)</p>
 
   <pre>
-@Subscribe('counterFacadeService', 'count$', {{'{'}}pipe: [delay(1000)]})
+@Subscribe(CounterFacadeService, 'count$', {{'{'}}pipe: [delay(1000)]})
 public observableWithOperator: number;
 </pre>
 
@@ -49,7 +49,7 @@ public observableWithOperator: number;
   <p>You can indicate your own subscription collector</p>
 
   <pre>
-@Subscribe('counterFacadeService', 'count$', {{'{'}}subscriptionsCollector: 'customSubscriptionsCollector'})
+@Subscribe(CounterFacadeService, 'count$', {{'{'}}subscriptionsCollector: 'customSubscriptionsCollector'})
 public observableCustomSubscriptionsCollector: number;
 </pre>
 
@@ -73,7 +73,7 @@ public observableCustomSubscriptionsCollector: number;
   <p>In case if you want to use takeUntil as a unsubscription tool</p>
 
   <pre>
-@Subscribe('counterFacadeService', 'count$', {{'{'}}takeUntil: 'takeUntilSubject'})
+@Subscribe(CounterFacadeService, 'count$', {{'{'}}takeUntil: 'takeUntilSubject'})
 public observableWithTakeUntil: number;
 </pre>
 
@@ -97,7 +97,7 @@ public observableWithTakeUntil: number;
   <p>If you want to resolve injection method with passed argument</p>
 
   <pre>
-@Get('counterFacadeService', 'countFunctionWithArg', {{'{'}}args: [3]})
+@Get(CounterFacadeService, 'countFunctionWithArg', {{'{'}}args: [3]})
 public getCountFunctionWithArguments: number;
 </pre>
 
